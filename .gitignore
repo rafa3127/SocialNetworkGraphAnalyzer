@@ -1,0 +1,29 @@
+# NetBeans
+nbproject/private/
+
+# Archivos compilados
+build/
+nbbuild/
+dist/
+nbdist/
+*.class
+
+# Maven
+target/
+
+# Sistema Operativo
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Archivos temporales del editor
+*~
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Excepción: NO ignorar JARs de librerías externas
+!lib/*.jar
