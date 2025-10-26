@@ -89,4 +89,18 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ## Notas de Implementación
 
-(Se irán agregando conforme se tomen decisiones técnicas durante el desarrollo)
+**Implementación de Lista Enlazada:**
+- Se utilizará lista **simple enlazada** con puntero al último nodo.
+- Suficiente para todas las operaciones requeridas (agregar, eliminar, buscar, recorrer)
+- Ventajas sobre doble enlazada:
+  - Implementación más simple y menos propensa a errores
+  - Menor consumo de memoria (un solo puntero por nodo)
+  - Complejidad adecuada: O(1) para agregar al final (con tail), O(n) para búsqueda/eliminación
+- La doble enlazada no aporta beneficios significativos para este caso de uso
+
+**Métodos omitidos en LinkedList:**
+- **Inserción en posiciones específicas**: No se implementan porque requerirían exponer la clase `Node` públicamente o usar índices (ineficiente en listas enlazadas). Para el caso de uso actual (HashMap y lista de adyacencia), solo se necesita agregar al final.
+- **Acceso por índice** (`get(index)`, `set(index)`): Operación O(n) poco eficiente en listas enlazadas.
+- **Acceso directo a nodos** (`getHead()`, `getTail()`): Se omite para mantener `Node` como detalle de implementación interna. No se expone la estructura interna de la lista (de ser necesario, se puede dejar de evitar usar los nodos desde fuera).
+
+Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos durante el desarrollo.
