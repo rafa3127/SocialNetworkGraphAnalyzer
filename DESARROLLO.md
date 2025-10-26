@@ -12,18 +12,25 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ## Fases de Desarrollo
 
-### ☐ Fase 1: Estructuras de Datos Core
-**Objetivo:** Implementar el grafo dirigido y sus operaciones básicas
-
-**Tareas:**
-- [ ] Crear clase de Nodos aplicada a usuarios
-- [ ] Crear clase Grafos aplicada a las relaciones de usuarios
+### Fase 0: Estructuras de Datos Base
+**Objetivo:** Implementar estructuras de datos base para la creacion de los grafos
+- [ ] Implementacion de Node generico
+- [ ] Implementacion de lista (por definir si doble o simplemente enlazada. quizas ambas)
+- [ ] Implementacion de hashmap (por definir si es posible)
+- [ ] Implementacion de grafo genérico
 - [ ] Implementar función para añadir nodos al grafo
 - [ ] Implementar función para remover nodos del grafo
 - [ ] Implementar función para establecer relaciones entre los nodos del grafo
 - [ ] Implementar función para remover relaciones entre nodos
 - [ ] Implementar función para listar nodos
 - [ ] Implementar función para obtener las relaciones de un nodo
+
+### ☐ Fase 1: Estructuras de Datos Core
+**Objetivo:** Implementar el grafo dirigido y sus operaciones básicas
+
+**Tareas:**
+- [ ] Definir tipo de dato user ( una clase user o un string simple? )
+- [ ] Crear clase Grafos aplicada a las relaciones de usuarios ( por definir si por herencia o simplemente una instancia del grafo base )
 - [ ] Testing con data hardcode temporal usando datos de ejemplo
 
 **Entregable:** Grafo funcional con todas las operaciones básicas validadas
