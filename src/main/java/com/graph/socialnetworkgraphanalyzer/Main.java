@@ -5,6 +5,7 @@
 package com.graph.socialnetworkgraphanalyzer;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.HashMap;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
 
 /**
  *
@@ -18,7 +19,11 @@ public class Main {
         System.out.println("\n=== Testing HashMap ===");
         testHashMap();
         
+        System.out.println("\n=== Testing Edge cases ===");
+        testEdgeCases();
+        
         System.out.println("\n=== All tests completed ===");
+        
     }
     
     private static void testLinkedList() {
@@ -46,6 +51,9 @@ public class Main {
         list.clear();
         System.out.println("After clear. Size: " + list.getSize());
         System.out.println("Is empty: " + list.isEmpty());
+        
+        // Test toString
+        System.out.println("List toString: " + list.toString());
     }
     
     private static void testHashMap() {
@@ -82,5 +90,39 @@ public class Main {
         }
         System.out.println("Size after adding 20 more: " + map.size());
         System.out.println("Get @user10: " + map.get("@user10"));
+        
+        // Test getKeys
+        System.out.println("\nTesting getKeys");
+        LinkedList<String> keys = map.getKeys();
+        Node<String> current = keys.getHead();
+        while ( current != null ) {
+            System.out.println(current.getData());
+            current = current.getNext();
+        }
+        
+        System.out.println("All keys using toString: " + keys.toString());
+    }
+    
+    private static void testEdgeCases() {
+        System.out.println("\n=== Testing Edge Cases ===");
+        
+        // LinkedList: remove empty list
+        LinkedList<String> emptyList = new LinkedList<>();
+        try {
+            emptyList.remove("@test");
+            System.out.println("ERROR: Should have thrown exception");
+        } catch (IllegalArgumentException e) {
+            System.out.println("✓ Empty list remove throws exception");
+        }
+        
+        // HashMap: get a key that does not exist
+        HashMap<String, String> emptyMap = new HashMap<>();
+        System.out.println("Get from empty map: " + emptyMap.get("@test"));
+        System.out.println("✓ Returns null correctly");
+        
+        // HashMap: isEmpty
+        System.out.println("Empty map isEmpty: " + emptyMap.isEmpty());
+        emptyMap.put("@key", "value");
+        System.out.println("Map with 1 element isEmpty: " + emptyMap.isEmpty());
     }
 }

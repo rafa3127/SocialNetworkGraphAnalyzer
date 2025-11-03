@@ -89,6 +89,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ## Notas de Implementación
 
+### Decisiones sobre LinkedList
 **Implementación de Lista Enlazada:**
 - Se utilizará lista **simple enlazada** con puntero al último nodo.
 - Suficiente para todas las operaciones requeridas (agregar, eliminar, buscar, recorrer)
@@ -105,6 +106,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos durante el desarrollo.
 
+### Decisiones sobre HashMap:
 **HashMap - Load Factor y Resize:**
 - Load factor de 0.75 elegido como balance entre memoria y performance
 - Es el estándar de la industria (usado por Java HashMap)
@@ -120,3 +122,22 @@ Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos d
 - Atributo `elementCount` en lugar de `size` para evitar confusión con el método `size()`
 - Aunque en Java es práctica estándar tener ambos con el mismo nombre, se optó por claridad
 
+
+### Métodos para hacer iterable y testeable las estructuras básicas:
+**LinkedList - Métodos para iteración y visualización:**
+- `getHead()`: Retorna el primer nodo para permitir iteración manual externa
+- `toString()`: Genera representación en string para debugging (formato: `[elem1, elem2, ...]`)
+- Expone la estructura interna mínimamente necesaria para casos de uso externos
+- Decisión tomada después de implementar HashMap, necesario para iterar `getKeys()`
+
+**Node - Getters públicos:**
+- `getData()`: Retorna el dato almacenado en el nodo
+- `getNext()`: Retorna el siguiente nodo en la lista
+- Necesarios para iteración externa desde paquetes diferentes a `basicdatastructures`
+- Los atributos permanecen package-private para acceso interno eficiente
+
+**HashMap - Método getKeys():**
+- Retorna una `LinkedList<K>` con todas las claves del mapa
+- Itera sobre todos los buckets y sus listas enlazadas
+- Complejidad O(n) donde n es el número de elementos
+- Necesario para implementar `getNodes()` en el grafo

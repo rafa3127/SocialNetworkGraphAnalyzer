@@ -211,4 +211,23 @@ public class HashMap<K,V> {
     public boolean isEmpty() {
         return this.elementCount == 0;
     }
+    
+    /**
+     * Returns a list of all keys in this map.
+     * 
+     * @return A LinkedList containing all keys present in the map
+     */
+    public LinkedList<K> getKeys() {
+        LinkedList<K> keys = new LinkedList<>();
+        
+        for (int i = 0; i < buckets.length; i++) {
+            Entry<K,V> current = buckets[i];
+            while (current != null) {
+                keys.add(current.key);
+                current = current.next;
+            }
+        }
+        
+        return keys;
+    }
 }

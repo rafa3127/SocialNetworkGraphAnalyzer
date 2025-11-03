@@ -124,4 +124,35 @@ public class LinkedList<T> {
         this.tail = this.head = null;
         this.size = 0;
     }
+    
+    /**
+     * Returns the first node of the list for external iteration.
+     * Allows iterate the list manually when needed.
+     * 
+     * @return The head node of the list, or null if the list is empty
+     */
+    public Node<T> getHead() {
+        return this.head;
+    }
+    
+    /**
+     * Returns a string representation of the list.
+     * Elements are displayed in order, separated by commas and enclosed in square brackets.
+     * 
+     * @return A string representation of the list
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("[");
+        Node<T> current = head;
+        while (current != null) {
+            sb.append(current.data);
+            if (current.next != null) {
+                sb.append(", ");
+            }
+            current = current.next;
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 }

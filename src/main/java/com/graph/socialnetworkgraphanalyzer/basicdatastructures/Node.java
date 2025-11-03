@@ -27,4 +27,22 @@ public class Node<T> {
         this.data = data;
         this.next = null;
     }
+    
+    /**
+     * Returns the data stored in this node.
+     * 
+     * @return The data of this node
+     */
+    public T getData() {
+        return this.data;
+    }
+    
+    /**
+     * Returns the next node in the list.
+     * 
+     * @return The next node, or null if this is the last node
+     */
+    public Node<T> getNext() {
+        return this.next;
+    }
 }
