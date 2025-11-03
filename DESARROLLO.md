@@ -31,7 +31,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Tareas:**
 - [x] Definir tipo de dato user → **DECISIÓN: Usar `String` directamente (handles como "@pepe")**
 - [x] Crear clase Grafos aplicada a las relaciones de usuarios → **DECISIÓN: Usar instancia `Graph<String>` directamente, sin wrapper**
-- [ ] Testing con data hardcode temporal usando datos de ejemplo
+- [x] Testing con data hardcode temporal usando datos de ejemplo
 
 **Entregable:** Grafo funcional con todas las operaciones básicas validadas con datos de prueba
 
