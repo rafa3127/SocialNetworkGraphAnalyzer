@@ -12,18 +12,18 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ## Fases de Desarrollo
 
-### Fase 0: Estructuras de Datos Base
+### ✅ Fase 0: Estructuras de Datos Base
 **Objetivo:** Implementar estructuras de datos base para la creacion de los grafos
 - [x] Implementacion de Node generico
 - [x] Implementacion de lista enlazada (simple enlazada con tail)
 - [x] Implementacion de hashmap (por definir si es posible). Posible ✅
-- [ ] Implementacion de grafo genérico
-- [ ] Implementar función para añadir nodos al grafo
-- [ ] Implementar función para remover nodos del grafo
-- [ ] Implementar función para establecer relaciones entre los nodos del grafo
-- [ ] Implementar función para remover relaciones entre nodos
-- [ ] Implementar función para listar nodos
-- [ ] Implementar función para obtener las relaciones de un nodo
+- [x] Implementacion de grafo genérico
+- [x] Implementar función para añadir nodos al grafo
+- [x] Implementar función para remover nodos del grafo
+- [x] Implementar función para establecer relaciones entre los nodos del grafo
+- [x] Implementar función para remover relaciones entre nodos
+- [x] Implementar función para listar nodos
+- [x] Implementar función para obtener las relaciones de un nodo
 
 ### ☐ Fase 1: Estructuras de Datos Core
 **Objetivo:** Implementar el grafo dirigido y sus operaciones básicas
