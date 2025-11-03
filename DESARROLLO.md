@@ -14,9 +14,9 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ### Fase 0: Estructuras de Datos Base
 **Objetivo:** Implementar estructuras de datos base para la creacion de los grafos
-- [ ] Implementacion de Node generico
-- [ ] Implementacion de lista (por definir si doble o simplemente enlazada. quizas ambas)
-- [ ] Implementacion de hashmap (por definir si es posible)
+- [x] Implementacion de Node generico
+- [x] Implementacion de lista enlazada (simple enlazada con tail)
+- [x] Implementacion de hashmap (por definir si es posible). Posible ✅
 - [ ] Implementacion de grafo genérico
 - [ ] Implementar función para añadir nodos al grafo
 - [ ] Implementar función para remover nodos del grafo
@@ -104,3 +104,19 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 - **Acceso directo a nodos** (`getHead()`, `getTail()`): Se omite para mantener `Node` como detalle de implementación interna. No se expone la estructura interna de la lista (de ser necesario, se puede dejar de evitar usar los nodos desde fuera).
 
 Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos durante el desarrollo.
+
+**HashMap - Load Factor y Resize:**
+- Load factor de 0.75 elegido como balance entre memoria y performance
+- Es el estándar de la industria (usado por Java HashMap)
+- Resize duplica la capacidad y rehashea todos los elementos
+- Costo de resize es O(n) pero amortizado es O(1) porque ocurre pocas veces
+
+**HashMap - Manejo de Colisiones:**
+- Usa separate chaining (listas enlazadas) para manejar colisiones
+- Cada bucket es el inicio de una lista enlazada de Entry
+- Complejidad: O(1) promedio, O(n) peor caso si todas las claves colisionan
+
+**HashMap - Naming Convention:**
+- Atributo `elementCount` en lugar de `size` para evitar confusión con el método `size()`
+- Aunque en Java es práctica estándar tener ambos con el mismo nombre, se optó por claridad
+
