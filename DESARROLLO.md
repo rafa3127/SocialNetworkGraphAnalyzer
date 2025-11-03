@@ -25,15 +25,17 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 - [x] Implementar función para listar nodos
 - [x] Implementar función para obtener las relaciones de un nodo
 
-### ☐ Fase 1: Estructuras de Datos Core
-**Objetivo:** Implementar el grafo dirigido y sus operaciones básicas
+### ⏳ Fase 1: Modelo de Red Social
+**Objetivo:** Definir cómo se usará el grafo genérico para representar la red social
 
 **Tareas:**
-- [ ] Definir tipo de dato user ( una clase user o un string simple? )
-- [ ] Crear clase Grafos aplicada a las relaciones de usuarios ( por definir si por herencia o simplemente una instancia del grafo base )
+- [x] Definir tipo de dato user → **DECISIÓN: Usar `String` directamente (handles como "@pepe")**
+- [x] Crear clase Grafos aplicada a las relaciones de usuarios → **DECISIÓN: Usar instancia `Graph<String>` directamente, sin wrapper**
 - [ ] Testing con data hardcode temporal usando datos de ejemplo
 
-**Entregable:** Grafo funcional con todas las operaciones básicas validadas
+**Entregable:** Grafo funcional con todas las operaciones básicas validadas con datos de prueba
+
+**Decisión tomada:** Se usará `Graph<String>` directamente por principio YAGNI (You Aren't Gonna Need It) y simplicidad. No se creará clase User ni SocialNetworkGraph wrapper a menos que surjan requerimientos que lo justifiquen.
 
 ---
 
@@ -41,9 +43,18 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Implementar la detección de componentes fuertemente conectados
 
 **Tareas:**
-- (a desarrollar previa investigación sobre el algoritmo y su implementación)
+- [ ] Investigar el algoritmo de Kosaraju y sus 3 pasos:
+  1. DFS en grafo original guardando orden de finalización
+  2. Transponer el grafo (invertir todas las aristas)
+  3. DFS en grafo transpuesto procesando nodos en orden de pila
+- [ ] Implementar clase `Kosaraju` en paquete `algorithm`
+- [ ] Implementar método estático genérico `findSCC(Graph<T>)`
+- [ ] Implementar métodos auxiliares privados (DFS, transpose)
+- [ ] Validar que detecta correctamente los 3 componentes de los datos de ejemplo
 
 **Entregable:** Algoritmo de Kosaraju funcionando correctamente
+
+**Decisión de diseño:** Kosaraju será una clase separada con método estático genérico, siguiendo el patrón estándar de algoritmos de grafos (separación de estructura y algoritmo).
 
 ---
 
@@ -155,3 +166,52 @@ Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos d
 - Grafo dirigido: `addEdge(from, to)` solo crea arista `from -> to` (no bidireccional)
 - `removeNode()` elimina tanto aristas salientes como entrantes del nodo
 - `getEdges()` tiene complejidad O(n + m) donde n=nodos, m=aristas
+
+### Decisiones sobre el modelo de red social (Fase 1)
+
+**String vs clase User**
+- **Decisión: Usar `String` directamente**
+- Razones:
+  - Suficiente para los requerimientos actuales (solo se necesita identificar usuarios)
+  - Los datos del archivo que usaremos para persistencia ya son Strings.
+  - Más simple de testear y debuggear
+  - String.hashCode() ya existe y es eficiente
+- Considerado pero descartado:
+  - Clase `User` permitiría agregar atributos (nombre, bio, etc.) pero no hay requerimiento actual
+  - Validación de formato (@ al inicio) se puede hacer en FileManager al cargar
+
+**¿Wrapper class vs instancia directa?**
+- **Decisión: Usar `Graph<String>` directamente sin wrapper**
+- Razones:
+  - Máxima simplicidad
+  - No hay necesidad de métodos específicos de red social
+  - Evita código boilerplate de delegación
+  - Separación clara: Graph = estructura, Kosaraju = algoritmo
+- Considerado pero descartado:
+  - `SocialNetworkGraph` wrapper permitiría métodos como `addFollowing()` o `findCommunities()`
+  - Herencia (`extends Graph<String>`) violaría principios de diseño
+  - Para proyecto académico, claridad > arquitectura
+
+**¿Dónde vive el algoritmo de Kosaraju?**
+- **Decisión: Clase separada en paquete `algorithm`**
+- Razones:
+  - Separación de responsabilidades (estructura vs algoritmo)
+  - Reusabilidad: funciona con cualquier `Graph<T>`
+  - Testing independiente
+  - Patrón estándar en algoritmos de grafos
+  - Facilita evaluación académica (clara separación de conceptos)
+- Estructura:
+  ```java
+  public class Kosaraju {
+      public static <T> LinkedList<LinkedList<T>> findSCC(Graph<T> graph) { }
+  }
+  ```
+
+### Extensibilidad futura
+Si en el futuro se necesitan características más complejas:
+- **Múltiples atributos por usuario**: Crear clase `User` y cambiar a `Graph<User>`
+- **Validaciones complejas**: Implementar en constructor de `User`
+- **Métodos específicos de red social**: Crear clase `SocialNetworkAnalyzer` con métodos estáticos
+- **Otros algoritmos**: Agregar clases en `algorithm` (ej: `PageRank`, `BFS`, etc.)
+
+La arquitectura actual permite estas extensiones sin necesidad de refactorización mayor, solo adiciones.
