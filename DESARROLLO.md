@@ -127,7 +127,7 @@ Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos d
 **LinkedList - Métodos para iteración y visualización:**
 - `getHead()`: Retorna el primer nodo para permitir iteración manual externa
 - `toString()`: Genera representación en string para debugging (formato: `[elem1, elem2, ...]`)
-- Expone la estructura interna mínimamente necesaria para casos de uso externos
+- Expone la estructura interna mínimamente necesaria para casos de uso externos d
 - Decisión tomada después de implementar HashMap, necesario para iterar `getKeys()`
 
 **Node - Getters públicos:**
@@ -141,3 +141,17 @@ Estos métodos pueden agregarse posteriormente si surgen nuevos requerimientos d
 - Itera sobre todos los buckets y sus listas enlazadas
 - Complejidad O(n) donde n es el número de elementos
 - Necesario para implementar `getNodes()` en el grafo
+
+### Decisiones sobre grafos 
+**Estructura del Grafo:**
+- Implementación con clase genérica `Graph<T>`
+- Los usuarios se representaran en nuestra instanciación como `String` (handle: "@pepe")
+- Uso: `Graph<String>` para el grafo de la red social
+- Lista de adyacencia implementada con `HashMap<T, LinkedList<T>>` (nuestras estructuras propias)
+- Contador de aristas (`edgeCount`) para operaciones O(1) de conteo
+- Clase `Edge<T>` para representar pares (from, to) en `getEdges()`
+
+**Graph - Operaciones:**
+- Grafo dirigido: `addEdge(from, to)` solo crea arista `from -> to` (no bidireccional)
+- `removeNode()` elimina tanto aristas salientes como entrantes del nodo
+- `getEdges()` tiene complejidad O(n + m) donde n=nodos, m=aristas

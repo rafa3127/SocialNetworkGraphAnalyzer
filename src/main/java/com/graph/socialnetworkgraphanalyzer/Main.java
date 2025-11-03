@@ -3,10 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.graph.socialnetworkgraphanalyzer;
-import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Edge;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.HashMap;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
-
 /**
  *
  * @author rafaelc3127
@@ -18,6 +19,9 @@ public class Main {
         
         System.out.println("\n=== Testing HashMap ===");
         testHashMap();
+        
+        System.out.println("\n=== Testing Graph ===");
+        testGraph();
         
         System.out.println("\n=== Testing Edge cases ===");
         testEdgeCases();
@@ -104,25 +108,143 @@ public class Main {
     }
     
     private static void testEdgeCases() {
-        System.out.println("\n=== Testing Edge Cases ===");
-        
-        // LinkedList: remove empty list
+        // LinkedList: remove from empty list
         LinkedList<String> emptyList = new LinkedList<>();
         try {
             emptyList.remove("@test");
             System.out.println("ERROR: Should have thrown exception");
         } catch (IllegalArgumentException e) {
-            System.out.println("✓ Empty list remove throws exception");
+            System.out.println("Empty list remove throws exception correctly");
         }
         
-        // HashMap: get a key that does not exist
+        // HashMap: get from empty map
         HashMap<String, String> emptyMap = new HashMap<>();
         System.out.println("Get from empty map: " + emptyMap.get("@test"));
-        System.out.println("✓ Returns null correctly");
+        System.out.println("Returns null correctly");
         
         // HashMap: isEmpty
         System.out.println("Empty map isEmpty: " + emptyMap.isEmpty());
         emptyMap.put("@key", "value");
         System.out.println("Map with 1 element isEmpty: " + emptyMap.isEmpty());
+        
+        // Graph: Add duplicate node
+        System.out.println("\n--- Graph Edge Cases ---");
+        Graph<String> graph = new Graph<>();
+        graph.addNode("@test");
+        try {
+            graph.addNode("@test");
+            System.out.println("ERROR: Should have thrown exception for duplicate node");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Adding duplicate node throws exception correctly");
+        }
+        
+        // Graph: Add edge with non-existent nodes
+        try {
+            graph.addEdge("@test", "@nonexistent");
+            System.out.println("ERROR: Should have thrown exception for non-existent node");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Adding edge with non-existent node throws exception correctly");
+        }
+        
+        // Graph: Remove non-existent node
+        try {
+            graph.removeNode("@nonexistent");
+            System.out.println("ERROR: Should have thrown exception for non-existent node");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Removing non-existent node throws exception correctly");
+        }
+        
+        // Graph: Remove non-existent edge
+        graph.addNode("@node2");
+        graph.addEdge("@test", "@node2");
+        try {
+            graph.removeEdge("@node2", "@test");  // Reverse direction doesn't exist
+            System.out.println("ERROR: Should have thrown exception for non-existent edge");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Removing non-existent edge throws exception correctly (directed graph)");
+        }
+        
+        // Graph: isEmpty on empty graph
+        Graph<String> emptyGraph = new Graph<>();
+        System.out.println("Empty graph isEmpty: " + emptyGraph.isEmpty());
+        emptyGraph.addNode("@single");
+        System.out.println("Graph with 1 node (0 edges) isEmpty: " + emptyGraph.isEmpty());
+    }
+    
+    private static void testGraph() {
+        Graph<String> graph = new Graph<>();
+        
+        // Test addNode
+        System.out.println("Adding nodes...");
+        graph.addNode("@pepe");
+        graph.addNode("@juan");
+        graph.addNode("@maria");
+        graph.addNode("@pedro");
+        System.out.println("Node count: " + graph.getNodeCount());
+        
+        // Test containsNode
+        System.out.println("Contains @juan: " + graph.containsNode("@juan"));
+        System.out.println("Contains @ana: " + graph.containsNode("@ana"));
+        
+        // Test addEdge (directed)
+        System.out.println("\nAdding directed edges...");
+        graph.addEdge("@pepe", "@juan");
+        graph.addEdge("@pepe", "@maria");
+        graph.addEdge("@juan", "@pedro");
+        graph.addEdge("@maria", "@pepe");  // Creates cycle
+        System.out.println("Edge count: " + graph.getEdgeCount());
+        
+        // Test getNodes
+        System.out.println("\nAll nodes:");
+        LinkedList<String> nodes = graph.getNodes();
+        System.out.println(nodes.toString());
+        
+        // Test getEdges
+        System.out.println("\nAll edges:");
+        LinkedList<Edge<String>> edges = graph.getEdges();
+        Node<Edge<String>> currentEdge = edges.getHead();
+        while (currentEdge != null) {
+            System.out.println("  " + currentEdge.getData().toString());
+            currentEdge = currentEdge.getNext();
+        }
+        
+        // Test directed nature (verify @juan -> @pepe doesn't exist)
+        System.out.println("\nVerifying directed graph:");
+        System.out.println("Edge @pepe -> @juan exists");
+        System.out.println("Checking if reverse edge exists...");
+        try {
+            graph.removeEdge("@juan", "@pepe");
+            System.out.println("ERROR: Reverse edge should not exist!");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Correct: Reverse edge does not exist (directed graph)");
+        }
+        
+        // Test removeEdge
+        System.out.println("\nRemoving edge @pepe -> @maria...");
+        graph.removeEdge("@pepe", "@maria");
+        System.out.println("Edge count after removal: " + graph.getEdgeCount());
+        
+        // Test removeNode (should remove all connected edges)
+        System.out.println("\nRemoving node @pepe (should remove 2 edges)...");
+        System.out.println("Edges before: " + graph.getEdgeCount());
+        graph.removeNode("@pepe");
+        System.out.println("Edges after: " + graph.getEdgeCount());
+        System.out.println("Nodes after: " + graph.getNodeCount());
+        
+        // Test isEmpty
+        System.out.println("\nIs empty: " + graph.isEmpty());
+        
+        // Create small cycle for visualization
+        System.out.println("\nCreating cycle: @juan -> @pedro -> @maria -> @juan");
+        graph.addEdge("@pedro", "@maria");
+        graph.addEdge("@maria", "@juan");
+        
+        System.out.println("\nFinal graph edges:");
+        edges = graph.getEdges();
+        currentEdge = edges.getHead();
+        while (currentEdge != null) {
+            System.out.println("  " + currentEdge.getData().toString());
+            currentEdge = currentEdge.getNext();
+        }
     }
 }
