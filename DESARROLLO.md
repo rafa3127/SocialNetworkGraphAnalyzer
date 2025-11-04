@@ -62,7 +62,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Leer y escribir archivos de texto con formato especificado
 
 **Tareas:**
-- [ ] **Capa 1 - Capa de lectura/escritura de archivos:** Implementar lectura/escritura básica de archivos
+- [x] **Capa 1 - Capa de lectura/escritura de archivos:** Implementar lectura/escritura básica de archivos
   - `readFile(String filepath)` -> retorna LinkedList<String> con todas las líneas
   - `writeFile(String filepath, LinkedList<String> lines)` -> escribe líneas al archivo (decidir si sobreescribir todo o agregar)
 - [ ] **Capa 2 - parser por secciones:** Implementar parser genérico de secciones
@@ -284,3 +284,14 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
 **Manejo de errores:**
 - **Decisión:** Estrategia fail-fast - si hay error de formato, no cargar nada
 - **Razón:** Mantener integridad de datos en proyecto académico
+
+**Decisiones de implementación - Capa 1 (FileIO):**
+
+**writeFile() genérico con validación:**
+- **Decisión:** Usar `LinkedList<?>` para aceptar cualquier tipo, no solo String
+- **Razón:** Mayor flexibilidad - puede escribir LinkedList de cualquier objeto que tenga toString()
+- **Validación en dos pasos:**
+  1. Primero convierte todos los elementos a String y valida
+  2. Solo si todo OK, escribe al archivo
+- **Ventaja:** Si hay error, no deja archivo corrupto a medio escribir (fail-fast)
+- **Maneja:** elementos null, toString() que retorna null, objetos sin toString() válido

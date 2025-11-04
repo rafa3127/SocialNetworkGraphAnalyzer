@@ -9,6 +9,8 @@ import com.graph.socialnetworkgraphanalyzer.basicdatastructures.HashMap;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
 import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
+import com.graph.socialnetworkgraphanalyzer.io.FileIO;
+import java.io.IOException;
 
 /**
  *
@@ -16,20 +18,23 @@ import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
  */
 public class Main {
     public static void main(String[] args) {
-        System.out.println("=== Testing LinkedList ===");
-        testLinkedList();
+//        System.out.println("=== Testing LinkedList ===");
+//        testLinkedList();
+//        
+//        System.out.println("\n=== Testing HashMap ===");
+//        testHashMap();
+//        
+//        System.out.println("\n=== Testing Graph ===");
+//        testGraph();
+//        
+//        System.out.println("\n=== Testing Edge cases ===");
+//        testEdgeCases();
+//        
+//        System.out.println("\n=== Testing Kosaraju ===");
+//        testKosaraju();
         
-        System.out.println("\n=== Testing HashMap ===");
-        testHashMap();
-        
-        System.out.println("\n=== Testing Graph ===");
-        testGraph();
-        
-        System.out.println("\n=== Testing Edge cases ===");
-        testEdgeCases();
-        
-        System.out.println("\n=== Testing Kosaraju ===");
-        testKosaraju();
+        System.out.println("\n=== Testing FileIO ===");
+        testFileIO();
         
         System.out.println("\n=== All tests completed ===");
         
@@ -309,5 +314,84 @@ public class Main {
             componentNum++;
             current = current.getNext();
         }
+    }
+    
+    private static void  testFileIO() {
+        try {
+            LinkedList<String> lines = FileIO.readFile("test_data/data.txt");
+            System.out.println("Lines:" + lines.toString());
+        } catch (IOException ex) {
+            System.out.println("Unexpected error when reading file");
+        }
+            // Write normal strings
+            try {
+                LinkedList<String> lines = new LinkedList<>();
+                lines.add("usuarios");
+                lines.add("@pepe");
+                lines.add("@juan");
+                lines.add("relaciones");
+                lines.add("@pepe, @juan");
+                
+                String outputPath = "test_data/output_test.txt";
+                FileIO.writeFile(outputPath, lines);
+                System.out.println("✅ Test 1 passed: Normal strings written successfully");
+                
+                // Verify by reading back
+                LinkedList<String> readBack = FileIO.readFile(outputPath);
+                System.out.println("Read back: " + readBack.toString());
+                
+            } catch (Exception e) {
+                System.out.println("❌ Test 1 failed: " + e.getMessage());
+            }
+            
+            // Write with null element
+            try {
+                LinkedList<String> linesWithNull = new LinkedList<>();
+                linesWithNull.add("line1");
+                linesWithNull.add(null);  // This should fail
+                linesWithNull.add("line3");
+                
+                FileIO.writeFile("test_data/should_fail.txt", linesWithNull);
+                System.out.println("❌ Test 2 failed: Should have thrown exception for null element");
+                
+            } catch (IllegalArgumentException e) {
+                System.out.println("✅ Test 2 passed: Correctly rejected null element - " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("❌ Test 2 failed with wrong exception: " + e.getMessage());
+            }
+            
+            // Write with non-String objects (should work with toString)
+            try {
+                LinkedList<Integer> numbers = new LinkedList<>();
+                numbers.add(1);
+                numbers.add(2);
+                numbers.add(3);
+                
+                String outputPath = "test_data/numbers_test.txt";
+                FileIO.writeFile(outputPath, numbers);
+                System.out.println("✅ Test 3 passed: Integers converted to String successfully");
+                
+                // Verify
+                LinkedList<String> readBack = FileIO.readFile(outputPath);
+                System.out.println("Read back numbers: " + readBack.toString());
+                
+            } catch (Exception e) {
+                System.out.println("❌ Test 3 failed: " + e.getMessage());
+            }
+            
+            // Write to invalid path (should throw IOException)
+            try {
+                LinkedList<String> lines = new LinkedList<>();
+                lines.add("test");
+                
+                FileIO.writeFile("/invalid/path/doesnt/exist/file.txt", lines);
+                System.out.println("❌ Test 4 failed: Should have thrown IOException for invalid path");
+                
+            } catch (IOException e) {
+                System.out.println("✅ Test 4 passed: Correctly threw IOException - " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("❌ Test 4 failed with wrong exception: " + e.getMessage());
+            }
+        
     }
 }

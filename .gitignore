@@ -27,3 +27,6 @@ Thumbs.db
 
 # Excepción: NO ignorar JARs de librerías externas
 !lib/*.jar
+
+# Ignorar carpeta de acrhivos para tests de manejo de archivos
+test_data/*.txt
