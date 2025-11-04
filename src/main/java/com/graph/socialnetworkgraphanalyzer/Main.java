@@ -8,6 +8,8 @@ import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.HashMap;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
+import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
+
 /**
  *
  * @author rafaelc3127
@@ -25,6 +27,9 @@ public class Main {
         
         System.out.println("\n=== Testing Edge cases ===");
         testEdgeCases();
+        
+        System.out.println("\n=== Testing Kosaraju ===");
+        testKosaraju();
         
         System.out.println("\n=== All tests completed ===");
         
@@ -245,6 +250,64 @@ public class Main {
         while (currentEdge != null) {
             System.out.println("  " + currentEdge.getData().toString());
             currentEdge = currentEdge.getNext();
+        }
+    }
+    
+    private static void testKosaraju() {
+        System.out.println("\n=== Testing Kosaraju: Project Data (13 users, 18 relations) ===");
+        Graph<String> graph = new Graph<>();
+        
+        // Add all 13 users
+        String[] users = {
+            "@pepe", "@mazinger", "@juanc", "@xoxojaime", "@tuqui33",
+            "@sancho23", "@terciopelo", "@caribedoble", "@africa",
+            "@totalfree", "@radiogaga", "@cipriano", "@newageforever"
+        };
+        
+        for (String user : users) {
+            graph.addNode(user);
+        }
+        
+        // Add all 18 relationships
+        graph.addEdge("@pepe", "@mazinger");
+        graph.addEdge("@mazinger", "@juanc");
+        graph.addEdge("@mazinger", "@tuqui33");
+        graph.addEdge("@tuqui33", "@xoxojaime");
+        graph.addEdge("@xoxojaime", "@pepe");
+        graph.addEdge("@juanc", "@sancho23");
+        graph.addEdge("@sancho23", "@mazinger");
+        graph.addEdge("@sancho23", "@terciopelo");
+        graph.addEdge("@terciopelo", "@juanc");
+        graph.addEdge("@terciopelo", "@newageforever");
+        graph.addEdge("@terciopelo", "@caribedoble");
+        graph.addEdge("@caribedoble", "@africa");
+        graph.addEdge("@africa", "@cipriano");
+        graph.addEdge("@cipriano", "@totalfree");
+        graph.addEdge("@cipriano", "@radiogaga");
+        graph.addEdge("@totalfree", "@africa");
+        graph.addEdge("@totalfree", "@radiogaga");
+        graph.addEdge("@radiogaga", "@caribedoble");
+        
+        System.out.println("Created graph with " + graph.getNodeCount() + " nodes and " + graph.getEdgeCount() + " edges");
+        
+        LinkedList<LinkedList<String>> components = Kosaraju.findSCC(graph);
+        
+        System.out.println("\nExpected: 3 components");
+        System.out.println("  - Component 1: 7 nodes (pepe, mazinger, juanc, xoxojaime, tuqui33, sancho23, terciopelo)");
+        System.out.println("  - Component 2: 5 nodes (africa, cipriano, totalfree, radiogaga, caribedoble)");
+        System.out.println("  - Component 3: 1 node (newageforever)");
+        
+        System.out.println("\nFound: " + components.getSize() + " component(s)");
+        
+        // Mostrar componentes con detalle
+        Node<LinkedList<String>> current = components.getHead();
+        int componentNum = 1;
+        while (current != null) {
+            LinkedList<String> component = current.getData();
+            System.out.println("\nComponent " + componentNum + " (" + component.getSize() + " nodes):");
+            System.out.println("  " + component.toString());
+            componentNum++;
+            current = current.getNext();
         }
     }
 }

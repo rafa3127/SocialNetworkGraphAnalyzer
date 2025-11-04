@@ -43,14 +43,14 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Implementar la detección de componentes fuertemente conectados
 
 **Tareas:**
-- [ ] Investigar el algoritmo de Kosaraju y sus 3 pasos:
+- [x] Investigar el algoritmo de Kosaraju y sus 3 pasos:
   1. DFS en grafo original guardando orden de finalización
   2. Transponer el grafo (invertir todas las aristas)
   3. DFS en grafo transpuesto procesando nodos en orden de pila
-- [ ] Implementar clase `Kosaraju` en paquete `algorithm`
-- [ ] Implementar método estático genérico `findSCC(Graph<T>)`
-- [ ] Implementar métodos auxiliares privados (DFS, transpose)
-- [ ] Validar que detecta correctamente los 3 componentes de los datos de ejemplo
+- [x] Implementar clase `Kosaraju` en paquete `algorithm`
+- [x] Implementar método estático genérico `findSCC(Graph<T>)`
+- [x] Implementar métodos auxiliares privados (DFS, transpose)
+- [x] Validar que detecta correctamente los 3 componentes de los datos de ejemplo
 
 **Entregable:** Algoritmo de Kosaraju funcionando correctamente
 
@@ -215,3 +215,34 @@ Si en el futuro se necesitan características más complejas:
 - **Otros algoritmos**: Agregar clases en `algorithm` (ej: `PageRank`, `BFS`, etc.)
 
 La arquitectura actual permite estas extensiones sin necesidad de refactorización mayor, solo adiciones.
+
+
+### Decisiones sobre el algoritmo de Kosaraju (Fase 2)
+
+**Método getOutgoingNodes() agregado a Graph**
+- **Decisión:** Agregar método público `getOutgoingNodes(T node)` en `Graph.java`
+- **Razón:** DFS necesita acceder a los nodos adyacentes de un nodo dado
+- **Alternativas consideradas:**
+  - Hacer DFS dentro de Graph: descartado, ya decidimos separar algoritmos de estructuras
+  - Exponer `adjacencyList`: descartado, rompe encapsulación
+
+**Implementación de DFS (Depth-First Search)**
+- **Decisión:** Método privado `dfs()` recursivo
+- **Orden de agregado:** Post-order (agregar nodo después de visitar todos sus descendientes)
+  - Crítico para Kosaraju: garantiza que nodos se agregan en orden de tiempo de finalización
+- **Estructura de visitados:** Usar `HashMap<T, Boolean>` en lugar de `LinkedList<T>`
+  - Razón: O(1) para verificar si fue visitado vs O(n) con lista
+  - HashMap más eficiente para grafos grandes
+- **Parámetro result:** LinkedList que puede ser usado como:
+  - Pila de finalización en primer DFS
+  - Componente individual en segundo DFS
+
+**Implementación de transpose()**
+- **Decisión:** Usar `getEdges()` y objetos `Edge` para invertir aristas
+- **Alternativa considerada:** Iterar manualmente con `getOutgoingNodes()`
+  - Descartado: más complejo, doble while loop anidado
+- **Ventajas de usar Edge:**
+  - Código más simple y legible: `edge.to` y `edge.from` son claros
+  - Reutiliza estructura existente
+  - Un solo while loop en lugar de dos anidados
+- **Complejidad:** O(n + m) donde n=nodos, m=aristas (óptimo)

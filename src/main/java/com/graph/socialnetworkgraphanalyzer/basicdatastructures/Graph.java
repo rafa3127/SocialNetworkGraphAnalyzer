@@ -160,6 +160,22 @@ public class Graph<T> {
     }
     
     /**
+     * Returns all adjacent nodes of a given node.
+     * In a directed graph, these are the nodes that can be reached 
+     * directly from the given node via an outgoing edge.
+     * 
+     * @param node The node whose adjacent nodes to retrieve
+     * @return A LinkedList containing all adjacent nodes
+     * @throws IllegalArgumentException if the node does not exist in the graph
+     */
+    public LinkedList<T> getOutgoingNodes(T node) {
+        if (!this.adjacencyList.containsKey(node)) {
+            throw new IllegalArgumentException("Node does not exist in graph");
+        }
+        return this.adjacencyList.get(node);
+    }
+    
+    /**
      * Returns the total number of edges in the graph.
      * 
      * @return The count of directed edges in the graph
