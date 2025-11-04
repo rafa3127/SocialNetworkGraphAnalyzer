@@ -3,15 +3,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.graph.socialnetworkgraphanalyzer;
+import java.io.IOException;
+
+import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Edge;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.HashMap;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
-import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
 import com.graph.socialnetworkgraphanalyzer.io.FileIO;
+import com.graph.socialnetworkgraphanalyzer.io.GraphFileManager;
 import com.graph.socialnetworkgraphanalyzer.io.SectionParser;
-import java.io.IOException;
 
 /**
  *
@@ -39,6 +41,9 @@ public class Main {
         
         System.out.println("\n=== Testing SectionParser ===");
         testSectionParser();
+        
+        System.out.println("\n=== Testing GraphFileManager ===");
+        testGraphFileManager();
         
         System.out.println("\n=== All tests completed ===");
         
@@ -530,6 +535,132 @@ public class Main {
             
         } catch (Exception e) {
             System.out.println("❌ Test 5 failed: " + e.getMessage());
+        }
+    }
+    
+    private static void testGraphFileManager() {
+        // Load graph from file and verify structure
+        try {
+            Graph<String> graph = GraphFileManager.loadGraphFromFile("test_data/data.txt");
+            
+            System.out.println("✅ Test 1: Graph loaded successfully");
+            System.out.println("  Nodes: " + graph.getNodeCount());
+            System.out.println("  Edges: " + graph.getEdgeCount());
+            
+            // Verify some users exist
+            if (graph.containsNode("@pepe") && graph.containsNode("@juan")) {
+                System.out.println("  Sample users verified: @pepe, @juan");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 1 failed: " + e.getMessage());
+        }
+        
+        // load graph to file
+        try {
+            // Create a test graph
+            Graph<String> originalGraph = new Graph<>();
+            originalGraph.addNode("@alice");
+            originalGraph.addNode("@bob");
+            originalGraph.addNode("@charlie");
+            originalGraph.addEdge("@alice", "@bob");
+            originalGraph.addEdge("@bob", "@charlie");
+            
+            // Save to file
+            String testFile = "test_data/roundtrip_test.txt";
+            GraphFileManager.saveGraphToFile(originalGraph, testFile);
+            System.out.println("✅ Test 2a: Graph saved successfully");
+            
+            // Load back
+            Graph<String> loadedGraph = GraphFileManager.loadGraphFromFile(testFile);
+            
+            // Verify counts match
+            if (loadedGraph.getNodeCount() == 3 && loadedGraph.getEdgeCount() == 2) {
+                System.out.println("✅ Test 2b: Round-trip successful");
+                System.out.println("  Loaded nodes: " + loadedGraph.getNodeCount());
+                System.out.println("  Loaded edges: " + loadedGraph.getEdgeCount());
+            } else {
+                System.out.println("❌ Test 2b failed: Counts don't match");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 2 failed: " + e.getMessage());
+        }
+        
+        // Load graph with only users (no relations)
+        try {
+            // Create file with only users
+            LinkedList<String> lines = new LinkedList<>();
+            lines.add("usuarios");
+            lines.add("@user1");
+            lines.add("@user2");
+            
+            String testFile = "test_data/only_users.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            Graph<String> graph = GraphFileManager.loadGraphFromFile(testFile);
+            
+            if (graph.getNodeCount() == 2 && graph.getEdgeCount() == 0) {
+                System.out.println("✅ Test 3: Graph with only users loaded correctly");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 3 failed: " + e.getMessage());
+        }
+        
+        // Load empty graph
+        try {
+            // Create empty file
+            LinkedList<String> lines = new LinkedList<>();
+            String testFile = "test_data/empty_graph.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            Graph<String> graph = GraphFileManager.loadGraphFromFile(testFile);
+            
+            if (graph.getNodeCount() == 0 && graph.getEdgeCount() == 0) {
+                System.out.println("✅ Test 4: Empty graph handled correctly");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 4 failed: " + e.getMessage());
+        }
+        
+        // Invalid user format (missing @)
+        try {
+            LinkedList<String> lines = new LinkedList<>();
+            lines.add("usuarios");
+            lines.add("invalid_user");  // Missing @
+            
+            String testFile = "test_data/invalid_user.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            GraphFileManager.loadGraphFromFile(testFile);
+            System.out.println("❌ Test 5 failed: Should have thrown exception");
+            
+        } catch (IllegalArgumentException e) {
+            System.out.println("✅ Test 5: Invalid user format rejected - " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Test 5 failed with wrong exception: " + e.getMessage());
+        }
+        
+        // Relation references non-existent user
+        try {
+            LinkedList<String> lines = new LinkedList<>();
+            lines.add("usuarios");
+            lines.add("@user1");
+            lines.add("relaciones");
+            lines.add("@user1, @nonexistent");  // @nonexistent doesn't exist
+            
+            String testFile = "test_data/invalid_relation.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            GraphFileManager.loadGraphFromFile(testFile);
+            System.out.println("❌ Test 6 failed: Should have thrown exception");
+            
+        } catch (IllegalArgumentException e) {
+            System.out.println("✅ Test 6: Invalid relation rejected - " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Test 6 failed with wrong exception: " + e.getMessage());
         }
     }
 }

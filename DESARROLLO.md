@@ -69,12 +69,12 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
   - `parseFileSections(LinkedList<String> lines, LinkedList<String> sectionNames)` -> resultados por secciones (podría ser HashMap<String, LinkedList<String>>)
   - Usa whitelist de nombres de sección para detectar headers
   - Agrupa líneas entre secciones
-- [ ] **Capa 3 - capa para cargar data en grafo:** Implementar lógica específica del grafo
+- [x] **Capa 3 - capa para cargar data en grafo:** Implementar lógica específica del grafo
   - `loadGraphFromFile(String filepath)` -> Graph<String>
   - `saveGraphToFile(Graph<String> graph, String filepath)` -> void
   - Validaciones: verificar si agregar validaciones (usuarios con @, relaciones con formato correcto, etc)
-- [ ] Testing con archivo de datos de ejemplo
-- [ ] Manejo de errores (archivo no existe, formato inválido, etc.)
+- [x] Testing con archivo de datos de ejemplo
+- [x] Manejo de errores (archivo no existe, formato inválido, etc.)
 
 **Entregable:** Sistema completo de persistencia de datos con arquitectura en 3 capas
 
@@ -82,7 +82,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ---
 
-### ☐ Fase 4: Interfaz Gráfica Básica
+### Fase 4: Interfaz Gráfica Básica
 **Objetivo:** Crear UI funcional con Swing usando NetBeans GUI Builder
 
 **Tareas:**
@@ -346,3 +346,12 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Reutilizable: La clase que manipulo la info de los Grafos no necesita conocer detalles del formato de secciones
   - evita duplicar lógica de formato en múltiples lugares
 - **Flujo completo:** FileIO.read() -> parse() -> [modificar] -> serialize() -> FileIO.write()
+
+**Decisiones de implementación - Capa 3 (GraphFileManager):**
+**Manejo de secciones faltantes:**
+- **Decisión:** Permitir archivos sin sección "usuarios" o sin sección "relaciones"
+- **Comportamiento:**
+  - Sin "usuarios": Crea grafo vacío (0 nodos, 0 aristas)
+  - Sin "relaciones": Crea grafo solo con nodos (N nodos, 0 aristas)
+- **Razón:** Flexibilidad para casos edge (archivos vacíos, grafos sin relaciones)
+
