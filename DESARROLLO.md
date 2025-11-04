@@ -86,9 +86,18 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Crear UI funcional con Swing usando NetBeans GUI Builder
 
 **Tareas:**
-- (a desarrollar)
+- [ ] Crear JFrame principal en paquete `ui`
+- [ ] Diseñar layout con NetBeans GUI Builder (controles, visualización placeholder, información)
+- [ ] Implementar controles para agregar/eliminar usuarios
+- [ ] Implementar controles para agregar/eliminar relaciones
+- [ ] Implementar carga de archivo con JFileChooser
+- [ ] Implementar guardado de archivo
+- [ ] Integrar ejecución de Kosaraju y mostrar resultados
+- [ ] Testing manual de funcionalidades
 
 **Entregable:** Interfaz gráfica completamente funcional
+
+**Decisión de diseño:** Una sola clase por simplicidad. Usar NetBeans GUI Builder para diseño visual, escribir solo event handlers manualmente.
 
 ---
 
