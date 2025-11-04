@@ -58,13 +58,27 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ---
 
-### ☐ Fase 3: Gestión de Archivos
+### Fase 3: Gestión de Archivos
 **Objetivo:** Leer y escribir archivos de texto con formato especificado
 
 **Tareas:**
-- (a desarrollar)
+- [ ] **Capa 1 - Capa de lectura/escritura de archivos:** Implementar lectura/escritura básica de archivos
+  - `readFile(String filepath)` -> retorna LinkedList<String> con todas las líneas
+  - `writeFile(String filepath, LinkedList<String> lines)` -> escribe líneas al archivo (decidir si sobreescribir todo o agregar)
+- [ ] **Capa 2 - parser por secciones:** Implementar parser genérico de secciones
+  - `parseFileSections(LinkedList<String> lines, LinkedList<String> sectionNames)` -> resultados por secciones (podría ser HashMap<String, LinkedList<String>>)
+  - Usa whitelist de nombres de sección para detectar headers
+  - Agrupa líneas entre secciones
+- [ ] **Capa 3 - capa para cargar data en grafo:** Implementar lógica específica del grafo
+  - `loadGraphFromFile(String filepath)` -> Graph<String>
+  - `saveGraphToFile(Graph<String> graph, String filepath)` -> void
+  - Validaciones: verificar si agregar validaciones (usuarios con @, relaciones con formato correcto, etc)
+- [ ] Testing con archivo de datos de ejemplo
+- [ ] Manejo de errores (archivo no existe, formato inválido, etc.)
 
-**Entregable:** Sistema completo de persistencia de datos
+**Entregable:** Sistema completo de persistencia de datos con arquitectura en 3 capas
+
+**Decisión de arquitectura:** Separar en 3 capas para separación de responsabilidades y reusabilidad
 
 ---
 
@@ -246,3 +260,27 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Reutiliza estructura existente
   - Un solo while loop en lugar de dos anidados
 - **Complejidad:** O(n + m) donde n=nodos, m=aristas (óptimo)
+
+### Decisiones sobre gestión de archivos (Fase 3)
+
+**Arquitectura en capas:**
+- **Decisión:** Implementar sistema de archivos en 3 capas independientes
+- **Razones:**
+  - Separación de responsabilidades (I/O básico, parsing genérico, lógica de negocio)
+  - Parser genérico reutilizable para cualquier archivo con secciones
+  - Facilita testing individual de cada capa
+  - Modificar lógica del grafo no afecta capas inferiores
+- **Alternativa considerada:** Implementación monolítica en una sola clase
+  - Descartado: difícil de mantener, testear y extender
+
+**Detección de secciones:**
+- **Decisión:** Usar whitelist de nombres de sección conocidos
+- **Razones:**
+  - Genérico: funciona independientemente del formato de datos
+  - Flexible: agregar secciones solo requiere actualizar whitelist
+- **Alternativas consideradas:**
+  - verificar las secciones basado en símbolos: descartado por no ser genérico
+
+**Manejo de errores:**
+- **Decisión:** Estrategia fail-fast - si hay error de formato, no cargar nada
+- **Razón:** Mantener integridad de datos en proyecto académico
