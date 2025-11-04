@@ -3,12 +3,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.graph.socialnetworkgraphanalyzer;
+import java.io.IOException;
+
+import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Edge;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.HashMap;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
-import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
+import com.graph.socialnetworkgraphanalyzer.io.FileIO;
+import com.graph.socialnetworkgraphanalyzer.io.GraphFileManager;
+import com.graph.socialnetworkgraphanalyzer.io.SectionParser;
 
 /**
  *
@@ -30,6 +35,15 @@ public class Main {
         
         System.out.println("\n=== Testing Kosaraju ===");
         testKosaraju();
+        
+        System.out.println("\n=== Testing FileIO ===");
+        testFileIO();
+        
+        System.out.println("\n=== Testing SectionParser ===");
+        testSectionParser();
+        
+        System.out.println("\n=== Testing GraphFileManager ===");
+        testGraphFileManager();
         
         System.out.println("\n=== All tests completed ===");
         
@@ -308,6 +322,345 @@ public class Main {
             System.out.println("  " + component.toString());
             componentNum++;
             current = current.getNext();
+        }
+    }
+    
+    private static void  testFileIO() {
+        try {
+            LinkedList<String> lines = FileIO.readFile("test_data/data.txt");
+            System.out.println("Lines:" + lines.toString());
+        } catch (IOException ex) {
+            System.out.println("Unexpected error when reading file");
+        }
+            // Write normal strings
+            try {
+                LinkedList<String> lines = new LinkedList<>();
+                lines.add("usuarios");
+                lines.add("@pepe");
+                lines.add("@juan");
+                lines.add("relaciones");
+                lines.add("@pepe, @juan");
+                
+                String outputPath = "test_data/output_test.txt";
+                FileIO.writeFile(outputPath, lines);
+                System.out.println("✅ Test 1 passed: Normal strings written successfully");
+                
+                // Verify by reading back
+                LinkedList<String> readBack = FileIO.readFile(outputPath);
+                System.out.println("Read back: " + readBack.toString());
+                
+            } catch (Exception e) {
+                System.out.println("❌ Test 1 failed: " + e.getMessage());
+            }
+            
+            // Write with null element
+            try {
+                LinkedList<String> linesWithNull = new LinkedList<>();
+                linesWithNull.add("line1");
+                linesWithNull.add(null);  // This should fail
+                linesWithNull.add("line3");
+                
+                FileIO.writeFile("test_data/should_fail.txt", linesWithNull);
+                System.out.println("❌ Test 2 failed: Should have thrown exception for null element");
+                
+            } catch (IllegalArgumentException e) {
+                System.out.println("✅ Test 2 passed: Correctly rejected null element - " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("❌ Test 2 failed with wrong exception: " + e.getMessage());
+            }
+            
+            // Write with non-String objects (should work with toString)
+            try {
+                LinkedList<Integer> numbers = new LinkedList<>();
+                numbers.add(1);
+                numbers.add(2);
+                numbers.add(3);
+                
+                String outputPath = "test_data/numbers_test.txt";
+                FileIO.writeFile(outputPath, numbers);
+                System.out.println("✅ Test 3 passed: Integers converted to String successfully");
+                
+                // Verify
+                LinkedList<String> readBack = FileIO.readFile(outputPath);
+                System.out.println("Read back numbers: " + readBack.toString());
+                
+            } catch (Exception e) {
+                System.out.println("❌ Test 3 failed: " + e.getMessage());
+            }
+            
+            // Write to invalid path (should throw IOException)
+            try {
+                LinkedList<String> lines = new LinkedList<>();
+                lines.add("test");
+                
+                FileIO.writeFile("/invalid/path/doesnt/exist/file.txt", lines);
+                System.out.println("❌ Test 4 failed: Should have thrown IOException for invalid path");
+                
+            } catch (IOException e) {
+                System.out.println("✅ Test 4 passed: Correctly threw IOException - " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("❌ Test 4 failed with wrong exception: " + e.getMessage());
+            }
+        
+    }
+    
+    private static void testSectionParser() {
+        
+        // Parse normal file with 2 sections
+        try {
+            // Create parser with whitelist
+            String[] whitelist = {"usuarios", "relaciones"};
+            SectionParser parser = new SectionParser(whitelist);
+            
+            // Read file and parse
+            LinkedList<String> lines = FileIO.readFile("test_data/data.txt");
+            HashMap<String, LinkedList<String>> sections = parser.parse(lines);
+            
+            // Check sections exist
+            System.out.println("✅ Test 1: File parsed successfully");
+            System.out.println("  Found " + sections.size() + " sections");
+            
+            // Display usuarios section
+            if (sections.containsKey("usuarios")) {
+                LinkedList<String> usuarios = sections.get("usuarios");
+                System.out.println("  Usuarios (" + usuarios.getSize() + " items): " + usuarios.toString());
+            }
+            
+            // Display relaciones section
+            if (sections.containsKey("relaciones")) {
+                LinkedList<String> relaciones = sections.get("relaciones");
+                System.out.println("  Relaciones (" + relaciones.getSize() + " items): " + relaciones.toString());
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 1 failed: " + e.getMessage());
+        }
+        
+        // Parse with empty lines and lines before first section
+        try {
+            LinkedList<String> testLines = new LinkedList<>();
+            testLines.add("this should be ignored");
+            testLines.add("");  // empty line
+            testLines.add("usuarios");
+            testLines.add("@user1");
+            testLines.add("");  // empty line
+            testLines.add("@user2");
+            testLines.add("relaciones");
+            testLines.add("@user1, @user2");
+            
+            String[] whitelist = {"usuarios", "relaciones"};
+            SectionParser parser = new SectionParser(whitelist);
+            HashMap<String, LinkedList<String>> sections = parser.parse(testLines);
+            
+            System.out.println("✅ Test 2: Handled empty lines and ignored pre-header line");
+            System.out.println("  Usuarios: " + sections.get("usuarios").toString());
+            System.out.println("  Relaciones: " + sections.get("relaciones").toString());
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 2 failed: " + e.getMessage());
+        }
+        
+        // Parse with duplicate sections (should sum)
+        try {
+            LinkedList<String> testLines = new LinkedList<>();
+            testLines.add("usuarios");
+            testLines.add("@user1");
+            testLines.add("relaciones");
+            testLines.add("@user1, @user2");
+            testLines.add("usuarios");  // duplicate section
+            testLines.add("@user3");
+            
+            String[] whitelist = {"usuarios", "relaciones"};
+            SectionParser parser = new SectionParser(whitelist);
+            HashMap<String, LinkedList<String>> sections = parser.parse(testLines);
+            
+            LinkedList<String> usuarios = sections.get("usuarios");
+            System.out.println("✅ Test 3: Duplicate sections summed correctly");
+            System.out.println("  Usuarios (should have 2 items): " + usuarios.toString());
+            System.out.println("  Size: " + usuarios.getSize());
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 3 failed: " + e.getMessage());
+        }
+        
+        // Empty sections
+        try {
+            LinkedList<String> testLines = new LinkedList<>();
+            testLines.add("usuarios");
+            testLines.add("relaciones");  // empty section
+            
+            String[] whitelist = {"usuarios", "relaciones"};
+            SectionParser parser = new SectionParser(whitelist);
+            HashMap<String, LinkedList<String>> sections = parser.parse(testLines);
+            
+            System.out.println("✅ Test 4: Empty sections handled");
+            System.out.println("  Usuarios size: " + sections.get("usuarios").getSize());
+            System.out.println("  Relaciones size: " + sections.get("relaciones").getSize());
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 4 failed: " + e.getMessage());
+        }
+        
+        // Serialize sections back to lines
+        try {
+            // Create sections manually
+            HashMap<String, LinkedList<String>> sections = new HashMap<>();
+            
+            LinkedList<String> usuarios = new LinkedList<>();
+            usuarios.add("@user1");
+            usuarios.add("@user2");
+            sections.put("usuarios", usuarios);
+            
+            LinkedList<String> relaciones = new LinkedList<>();
+            relaciones.add("@user1, @user2");
+            sections.put("relaciones", relaciones);
+            
+            // Serialize
+            String[] whitelist = {"usuarios", "relaciones"};
+            SectionParser parser = new SectionParser(whitelist);
+            LinkedList<String> lines = parser.serialize(sections);
+            
+            System.out.println("✅ Test 5: Serialize sections back to lines");
+            System.out.println("  Generated " + lines.getSize() + " lines: " + lines.toString());
+            
+            // parse again and verify
+            HashMap<String, LinkedList<String>> parsedAgain = parser.parse(lines);
+            System.out.println("  usuarios size: " + parsedAgain.get("usuarios").getSize());
+            System.out.println("  relaciones size: " + parsedAgain.get("relaciones").getSize());
+            
+            if (parsedAgain.get("usuarios").getSize() == 2 && 
+                parsedAgain.get("relaciones").getSize() == 1) {
+                System.out.println("  Serialization successful!");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 5 failed: " + e.getMessage());
+        }
+    }
+    
+    private static void testGraphFileManager() {
+        // Load graph from file and verify structure
+        try {
+            Graph<String> graph = GraphFileManager.loadGraphFromFile("test_data/data.txt");
+            
+            System.out.println("✅ Test 1: Graph loaded successfully");
+            System.out.println("  Nodes: " + graph.getNodeCount());
+            System.out.println("  Edges: " + graph.getEdgeCount());
+            
+            // Verify some users exist
+            if (graph.containsNode("@pepe") && graph.containsNode("@juan")) {
+                System.out.println("  Sample users verified: @pepe, @juan");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 1 failed: " + e.getMessage());
+        }
+        
+        // load graph to file
+        try {
+            // Create a test graph
+            Graph<String> originalGraph = new Graph<>();
+            originalGraph.addNode("@alice");
+            originalGraph.addNode("@bob");
+            originalGraph.addNode("@charlie");
+            originalGraph.addEdge("@alice", "@bob");
+            originalGraph.addEdge("@bob", "@charlie");
+            
+            // Save to file
+            String testFile = "test_data/roundtrip_test.txt";
+            GraphFileManager.saveGraphToFile(originalGraph, testFile);
+            System.out.println("✅ Test 2a: Graph saved successfully");
+            
+            // Load back
+            Graph<String> loadedGraph = GraphFileManager.loadGraphFromFile(testFile);
+            
+            // Verify counts match
+            if (loadedGraph.getNodeCount() == 3 && loadedGraph.getEdgeCount() == 2) {
+                System.out.println("✅ Test 2b: Round-trip successful");
+                System.out.println("  Loaded nodes: " + loadedGraph.getNodeCount());
+                System.out.println("  Loaded edges: " + loadedGraph.getEdgeCount());
+            } else {
+                System.out.println("❌ Test 2b failed: Counts don't match");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 2 failed: " + e.getMessage());
+        }
+        
+        // Load graph with only users (no relations)
+        try {
+            // Create file with only users
+            LinkedList<String> lines = new LinkedList<>();
+            lines.add("usuarios");
+            lines.add("@user1");
+            lines.add("@user2");
+            
+            String testFile = "test_data/only_users.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            Graph<String> graph = GraphFileManager.loadGraphFromFile(testFile);
+            
+            if (graph.getNodeCount() == 2 && graph.getEdgeCount() == 0) {
+                System.out.println("✅ Test 3: Graph with only users loaded correctly");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 3 failed: " + e.getMessage());
+        }
+        
+        // Load empty graph
+        try {
+            // Create empty file
+            LinkedList<String> lines = new LinkedList<>();
+            String testFile = "test_data/empty_graph.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            Graph<String> graph = GraphFileManager.loadGraphFromFile(testFile);
+            
+            if (graph.getNodeCount() == 0 && graph.getEdgeCount() == 0) {
+                System.out.println("✅ Test 4: Empty graph handled correctly");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("❌ Test 4 failed: " + e.getMessage());
+        }
+        
+        // Invalid user format (missing @)
+        try {
+            LinkedList<String> lines = new LinkedList<>();
+            lines.add("usuarios");
+            lines.add("invalid_user");  // Missing @
+            
+            String testFile = "test_data/invalid_user.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            GraphFileManager.loadGraphFromFile(testFile);
+            System.out.println("❌ Test 5 failed: Should have thrown exception");
+            
+        } catch (IllegalArgumentException e) {
+            System.out.println("✅ Test 5: Invalid user format rejected - " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Test 5 failed with wrong exception: " + e.getMessage());
+        }
+        
+        // Relation references non-existent user
+        try {
+            LinkedList<String> lines = new LinkedList<>();
+            lines.add("usuarios");
+            lines.add("@user1");
+            lines.add("relaciones");
+            lines.add("@user1, @nonexistent");  // @nonexistent doesn't exist
+            
+            String testFile = "test_data/invalid_relation.txt";
+            FileIO.writeFile(testFile, lines);
+            
+            GraphFileManager.loadGraphFromFile(testFile);
+            System.out.println("❌ Test 6 failed: Should have thrown exception");
+            
+        } catch (IllegalArgumentException e) {
+            System.out.println("✅ Test 6: Invalid relation rejected - " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("❌ Test 6 failed with wrong exception: " + e.getMessage());
         }
     }
 }

@@ -29,8 +29,8 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Definir cómo se usará el grafo genérico para representar la red social
 
 **Tareas:**
-- [x] Definir tipo de dato user → **DECISIÓN: Usar `String` directamente (handles como "@pepe")**
-- [x] Crear clase Grafos aplicada a las relaciones de usuarios → **DECISIÓN: Usar instancia `Graph<String>` directamente, sin wrapper**
+- [x] Definir tipo de dato user -> **DECISIÓN: Usar `String` directamente (handles como "@pepe")**
+- [x] Crear clase Grafos aplicada a las relaciones de usuarios -> **DECISIÓN: Usar instancia `Graph<String>` directamente, sin wrapper**
 - [x] Testing con data hardcode temporal usando datos de ejemplo
 
 **Entregable:** Grafo funcional con todas las operaciones básicas validadas con datos de prueba
@@ -58,17 +58,31 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ---
 
-### ☐ Fase 3: Gestión de Archivos
+### Fase 3: Gestión de Archivos
 **Objetivo:** Leer y escribir archivos de texto con formato especificado
 
 **Tareas:**
-- (a desarrollar)
+- [x] **Capa 1 - Capa de lectura/escritura de archivos:** Implementar lectura/escritura básica de archivos
+  - `readFile(String filepath)` -> retorna LinkedList<String> con todas las líneas
+  - `writeFile(String filepath, LinkedList<String> lines)` -> escribe líneas al archivo (decidir si sobreescribir todo o agregar)
+- [x] **Capa 2 - parser por secciones:** Implementar parser genérico de secciones
+  - `parseFileSections(LinkedList<String> lines, LinkedList<String> sectionNames)` -> resultados por secciones (podría ser HashMap<String, LinkedList<String>>)
+  - Usa whitelist de nombres de sección para detectar headers
+  - Agrupa líneas entre secciones
+- [x] **Capa 3 - capa para cargar data en grafo:** Implementar lógica específica del grafo
+  - `loadGraphFromFile(String filepath)` -> Graph<String>
+  - `saveGraphToFile(Graph<String> graph, String filepath)` -> void
+  - Validaciones: verificar si agregar validaciones (usuarios con @, relaciones con formato correcto, etc)
+- [x] Testing con archivo de datos de ejemplo
+- [x] Manejo de errores (archivo no existe, formato inválido, etc.)
 
-**Entregable:** Sistema completo de persistencia de datos
+**Entregable:** Sistema completo de persistencia de datos con arquitectura en 3 capas
+
+**Decisión de arquitectura:** Separar en 3 capas para separación de responsabilidades y reusabilidad
 
 ---
 
-### ☐ Fase 4: Interfaz Gráfica Básica
+### Fase 4: Interfaz Gráfica Básica
 **Objetivo:** Crear UI funcional con Swing usando NetBeans GUI Builder
 
 **Tareas:**
@@ -246,3 +260,98 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Reutiliza estructura existente
   - Un solo while loop en lugar de dos anidados
 - **Complejidad:** O(n + m) donde n=nodos, m=aristas (óptimo)
+
+### Decisiones sobre gestión de archivos (Fase 3)
+
+**Arquitectura en capas:**
+- **Decisión:** Implementar sistema de archivos en 3 capas independientes
+- **Razones:**
+  - Separación de responsabilidades (I/O básico, parsing genérico, lógica de negocio)
+  - Parser genérico reutilizable para cualquier archivo con secciones
+  - Facilita testing individual de cada capa
+  - Modificar lógica del grafo no afecta capas inferiores
+- **Alternativa considerada:** Implementación monolítica en una sola clase
+  - Descartado: difícil de mantener, testear y extender
+
+**Detección de secciones:**
+- **Decisión:** Usar whitelist de nombres de sección conocidos
+- **Razones:**
+  - Genérico: funciona independientemente del formato de datos
+  - Flexible: agregar secciones solo requiere actualizar whitelist
+- **Alternativas consideradas:**
+  - verificar las secciones basado en símbolos: descartado por no ser genérico
+
+**Manejo de errores:**
+- **Decisión:** Estrategia fail-fast - si hay error de formato, no cargar nada
+- **Razón:** Mantener integridad de datos en proyecto académico
+
+**Decisiones de implementación - Capa 1 (FileIO):**
+
+**writeFile() genérico con validación:**
+- **Decisión:** Usar `LinkedList<?>` para aceptar cualquier tipo, no solo String
+- **Razón:** Mayor flexibilidad - puede escribir LinkedList de cualquier objeto que tenga toString()
+- **Validación en dos pasos:**
+  1. Primero convierte todos los elementos a String y valida
+  2. Solo si todo OK, escribe al archivo
+- **Ventaja:** Si hay error, no deja archivo corrupto a medio escribir (fail-fast)
+- **Maneja:** elementos null, toString() que retorna null, objetos sin toString() válido
+
+**Decisiones de implementación - Capa 2 (SectionParser):**
+
+**Parser como clase instanciable:**
+- **Decisión:** SectionParser se instancia con constructor que recibe whitelist, no métodos estáticos
+- **Estructura:** `parser = new SectionParser(whitelist)` -> `parser.parse(lines)`
+- **Razones:**
+  - Encapsulación: cada parser mantiene su propia whitelist
+  - Reutilizable: crear una vez, usar múltiples veces
+  - Flexible: múltiples parsers con diferentes whitelists si es necesario
+  - OOP correcto: estado (whitelist) + comportamiento (parse)
+- **Alternativa considerada:** Métodos estáticos con whitelist como parámetro
+  - Descartado: menos orientado a objetos, whitelist se pasa en cada llamada
+- **Alternativa considerada:** Whitelist como atributo estático mutable
+  - Descartado: estado global.
+
+**Manejo de casos especiales:**
+- **Líneas fuera de sección:** Ignorar (antes del primer header)
+- **Líneas vacías:** Ignorar siempre
+- **Case sensitivity:** Nombres de sección son case-sensitive
+- **Secciones duplicadas:** Sumar líneas a la sección existente (no sobrescribir)
+  - Permite archivos con múltiples bloques de la misma sección
+- **Secciones vacías:** Crear LinkedList vacía (válido)
+
+**Algoritmo de parseo:**
+1. Iterar sobre todas las líneas
+2. Si línea vacía -> ignorar
+3. Si línea está en whitelist -> iniciar/continuar sección
+4. Si no -> agregar a sección actual (si existe)
+5. Si sección ya existe en HashMap -> agregar líneas a la existente
+
+**HashMap como Set para whitelist:**
+- **Decisión:** Usar `HashMap<String, Boolean>` para almacenar nombres de sección válidos
+- **Razones:**
+  - O(1) vs O(n) con array o Lista
+  - Garantiza unicidad (no permite duplicados)
+  - Escalable: si el proyecto crece y se agregan más secciones, mantiene performance
+  - Parser genérico reutilizable: puede usarse en otros contextos con más secciones
+- **Trade-off:** Pequeño overhead de memoria para pocos elementos (2-10 secciones típicas)
+- **Alternativa considerada:** Array de Strings
+  - Descartado: no garantiza unicidad, O(n) (aunque n pequeño en este caso)
+- **Nota:** Java tiene java.util.Set pero está restringido. HashMap funciona perfectamente como Set usando solo las keys.
+
+**Método serialize() - operación inversa:**
+- **Decisión:** Agregar método `serialize()` que convierte HashMap de secciones de vuelta a líneas
+- **Razones:**
+  - Simetría: parse() convierte líneas -> HashMap, serialize() convierte HashMap -> líneas
+  - Cohesión: el parser conoce el formato de secciones, debe poder construirlo también
+  - Reutilizable: La clase que manipulo la info de los Grafos no necesita conocer detalles del formato de secciones
+  - evita duplicar lógica de formato en múltiples lugares
+- **Flujo completo:** FileIO.read() -> parse() -> [modificar] -> serialize() -> FileIO.write()
+
+**Decisiones de implementación - Capa 3 (GraphFileManager):**
+**Manejo de secciones faltantes:**
+- **Decisión:** Permitir archivos sin sección "usuarios" o sin sección "relaciones"
+- **Comportamiento:**
+  - Sin "usuarios": Crea grafo vacío (0 nodos, 0 aristas)
+  - Sin "relaciones": Crea grafo solo con nodos (N nodos, 0 aristas)
+- **Razón:** Flexibilidad para casos edge (archivos vacíos, grafos sin relaciones)
+
