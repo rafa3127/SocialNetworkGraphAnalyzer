@@ -29,8 +29,8 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Definir cómo se usará el grafo genérico para representar la red social
 
 **Tareas:**
-- [x] Definir tipo de dato user → **DECISIÓN: Usar `String` directamente (handles como "@pepe")**
-- [x] Crear clase Grafos aplicada a las relaciones de usuarios → **DECISIÓN: Usar instancia `Graph<String>` directamente, sin wrapper**
+- [x] Definir tipo de dato user -> **DECISIÓN: Usar `String` directamente (handles como "@pepe")**
+- [x] Crear clase Grafos aplicada a las relaciones de usuarios -> **DECISIÓN: Usar instancia `Graph<String>` directamente, sin wrapper**
 - [x] Testing con data hardcode temporal usando datos de ejemplo
 
 **Entregable:** Grafo funcional con todas las operaciones básicas validadas con datos de prueba
@@ -65,7 +65,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 - [x] **Capa 1 - Capa de lectura/escritura de archivos:** Implementar lectura/escritura básica de archivos
   - `readFile(String filepath)` -> retorna LinkedList<String> con todas las líneas
   - `writeFile(String filepath, LinkedList<String> lines)` -> escribe líneas al archivo (decidir si sobreescribir todo o agregar)
-- [ ] **Capa 2 - parser por secciones:** Implementar parser genérico de secciones
+- [x] **Capa 2 - parser por secciones:** Implementar parser genérico de secciones
   - `parseFileSections(LinkedList<String> lines, LinkedList<String> sectionNames)` -> resultados por secciones (podría ser HashMap<String, LinkedList<String>>)
   - Usa whitelist de nombres de sección para detectar headers
   - Agrupa líneas entre secciones
@@ -295,3 +295,54 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   2. Solo si todo OK, escribe al archivo
 - **Ventaja:** Si hay error, no deja archivo corrupto a medio escribir (fail-fast)
 - **Maneja:** elementos null, toString() que retorna null, objetos sin toString() válido
+
+**Decisiones de implementación - Capa 2 (SectionParser):**
+
+**Parser como clase instanciable:**
+- **Decisión:** SectionParser se instancia con constructor que recibe whitelist, no métodos estáticos
+- **Estructura:** `parser = new SectionParser(whitelist)` -> `parser.parse(lines)`
+- **Razones:**
+  - Encapsulación: cada parser mantiene su propia whitelist
+  - Reutilizable: crear una vez, usar múltiples veces
+  - Flexible: múltiples parsers con diferentes whitelists si es necesario
+  - OOP correcto: estado (whitelist) + comportamiento (parse)
+- **Alternativa considerada:** Métodos estáticos con whitelist como parámetro
+  - Descartado: menos orientado a objetos, whitelist se pasa en cada llamada
+- **Alternativa considerada:** Whitelist como atributo estático mutable
+  - Descartado: estado global.
+
+**Manejo de casos especiales:**
+- **Líneas fuera de sección:** Ignorar (antes del primer header)
+- **Líneas vacías:** Ignorar siempre
+- **Case sensitivity:** Nombres de sección son case-sensitive
+- **Secciones duplicadas:** Sumar líneas a la sección existente (no sobrescribir)
+  - Permite archivos con múltiples bloques de la misma sección
+- **Secciones vacías:** Crear LinkedList vacía (válido)
+
+**Algoritmo de parseo:**
+1. Iterar sobre todas las líneas
+2. Si línea vacía -> ignorar
+3. Si línea está en whitelist -> iniciar/continuar sección
+4. Si no -> agregar a sección actual (si existe)
+5. Si sección ya existe en HashMap -> agregar líneas a la existente
+
+**HashMap como Set para whitelist:**
+- **Decisión:** Usar `HashMap<String, Boolean>` para almacenar nombres de sección válidos
+- **Razones:**
+  - O(1) vs O(n) con array o Lista
+  - Garantiza unicidad (no permite duplicados)
+  - Escalable: si el proyecto crece y se agregan más secciones, mantiene performance
+  - Parser genérico reutilizable: puede usarse en otros contextos con más secciones
+- **Trade-off:** Pequeño overhead de memoria para pocos elementos (2-10 secciones típicas)
+- **Alternativa considerada:** Array de Strings
+  - Descartado: no garantiza unicidad, O(n) (aunque n pequeño en este caso)
+- **Nota:** Java tiene java.util.Set pero está restringido. HashMap funciona perfectamente como Set usando solo las keys.
+
+**Método serialize() - operación inversa:**
+- **Decisión:** Agregar método `serialize()` que convierte HashMap de secciones de vuelta a líneas
+- **Razones:**
+  - Simetría: parse() convierte líneas -> HashMap, serialize() convierte HashMap -> líneas
+  - Cohesión: el parser conoce el formato de secciones, debe poder construirlo también
+  - Reutilizable: La clase que manipulo la info de los Grafos no necesita conocer detalles del formato de secciones
+  - evita duplicar lógica de formato en múltiples lugares
+- **Flujo completo:** FileIO.read() -> parse() -> [modificar] -> serialize() -> FileIO.write()
