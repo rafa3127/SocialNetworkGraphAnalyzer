@@ -86,9 +86,18 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Crear UI funcional con Swing usando NetBeans GUI Builder
 
 **Tareas:**
-- (a desarrollar)
+- [x] Crear JFrame principal en paquete `ui`
+- [x] Diseñar layout con NetBeans GUI Builder (controles, visualización placeholder, información)
+- [x] Implementar controles para agregar/eliminar usuarios
+- [x] Implementar controles para agregar/eliminar relaciones
+- [x] Implementar carga de archivo con JFileChooser
+- [x] Implementar guardado de archivo
+- [x] Integrar ejecución de Kosaraju y mostrar resultados
+- [x] Testing manual de funcionalidades
 
 **Entregable:** Interfaz gráfica completamente funcional
+
+**Decisión de diseño:** Una sola clase por simplicidad. Usar NetBeans GUI Builder para diseño visual, escribir solo event handlers manualmente.
 
 ---
 
@@ -355,3 +364,165 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Sin "relaciones": Crea grafo solo con nodos (N nodos, 0 aristas)
 - **Razón:** Flexibilidad para casos edge (archivos vacíos, grafos sin relaciones)
 
+### Decisiones sobre interfaz gráfica (Fase 4)
+
+**Arquitectura componencial vs clase monolítica:**
+- **Decisión:** Usar arquitectura componencial - cada sección de UI es una clase JPanel separada
+- **Razones:**
+  - Código más organizado y mantenible (evita clase de muchas líneas)
+  - Cada panel se diseña independientemente en NetBeans GUI Builder (hasta donde me es posible, Tambien se añaden props programaticamente)
+  - Facilita testing y debugging
+  - Natural para desarrollador con mi experiencia en frameworks componenciales
+- **Alternativa considerada:** Todo en una sola clase 
+  - Ventajas: Más simple, menos archivos, estándar en proyectos pequeños Swing
+  - Descartado: Preferencia por código modular
+- **Estructura:**
+  ```
+  SocialNetworkUI (JFrame) - orquestador principal
+    ├── InfoPanel (JPanel) - muestra información 
+    ├── ControlsPanel (JPanel) - controles de modificación (futuro)
+    └── VisualizationPanel (JPanel) - visualización GraphStream (futuro)
+  ```
+
+**Comunicación entre componentes:**
+- **Decisión:** Métodos públicos que reciben el grafo como parámetro
+- **Estructura:** `infoPanel.updateGraphInfo(currentGraph)`
+- **Razones:**
+  - Simple y directo
+  - No requiere interfaces complejas o listeners para este caso de uso
+  - Desacoplado: InfoPanel no necesita conocer detalles del JFrame principal
+- **Alternativas consideradas:**
+  - Pasar grafo en constructor: más acoplado, menos flexible
+  - Callbacks complejos: over-engineering para caso particular
+- **Flujo de datos:** SocialNetworkUI (dueño del estado) -> llama métodos públicos -> paneles se actualizan
+
+**Ensamblado de componentes:**
+- **Decisión:** Ensamblar paneles programáticamente en constructor de SocialNetworkUI
+- **Razones:**
+  - NetBeans GUI Builder tiene limitaciones con BorderLayout dinámico
+  - Más control sobre posicionamiento y tamaños
+  - Cada panel se diseña cómodamente en GUI Builder por separado
+- **Nota importante:** `initComponents()` es generado por NetBeans - NUNCA modificar. Toda lógica va después en el constructor
+
+**InfoPanel - Diseño y actualización:**
+- **Layout:** GridBagLayout para control preciso de posicionamiento y expansión
+
+**Carga de archivos con JFileChooser:**
+- **Implementación:** Método `loadFile()` privado llamado desde MenuItem
+- **Flujo:**
+  1. Abrir JFileChooser con filtro .txt
+  2. Si usuario selecciona archivo -> `GraphFileManager.loadGraphFromFile()`
+  3. Actualizar `currentGraph` y `currentFilePath`
+  4. Llamar `infoPanel.updateGraphInfo(currentGraph)`
+  5. Mostrar diálogo de éxito con conteos
+- **Manejo de errores:** try-catch con JOptionPane.showMessageDialog para mostrar errores al usuario
+
+**Trade-offs aceptados:**
+- Arquitectura componencial toma más tiempo inicialmente pero mejora mantenibilidad
+- Mezclar GUI Builder con código manual (ensamblado) es necesario por limitaciones de NetBeans
+- Algunos estilos visuales se configuran por código en lugar de GUI Builder (más control, menos visual)
+
+**Patrón de comunicación hijo -> padre:**
+- **Decisión:** Implementar interface `GraphUpdateListener` con método `onGraphUpdated()`
+- **Razones:**
+  - En el caso de ControlsPanel, no se pudo solo pasar el grafo como estaba previsto en decisiones anteriores, ya que se manipula el grafo. Se debe usar un listener para notificar cambios al padre y propagarlos
+  - Simple: Solo una interface con un método
+  - Escalable: Fácil agregar más listeners si es necesario
+  - Patrón estándar: Observer/Listener
+
+**Manejo de estado del grafo:**
+- **Decisión:** Grafo siempre existe (nunca null), se inicializa como `new Graph<>()` vacío
+- **Razones:**
+  - Usuario puede empezar agregando usuarios sin cargar archivo
+  - Simplifica código (no validar `graph == null` en cada operación)
+  - Comportamiento más natural y flexible
+- **Implicación:** `currentFilePath` puede ser null si no se ha cargado/guardado archivo
+- **Manejo de guardado sin archivo:**
+  - Si `currentFilePath == null` al guardar, abrir JFileChooser (Save As dialog) (Por implementar al momento de escribir esta nota)
+  - Guardados subsecuentes usan la misma ruta
+- **Comportamiento estándar:** Similar a editores de texto (nuevo documento -> guardar -> pedir ruta)
+
+**Actualización de ComboBoxes en ControlsPanel:**
+- **Decisión:** Iterar LinkedList una sola vez agregando ítems directamente con `addItem()`
+- **Razones:**
+  - Más eficiente que crear array temporal y volver a iterarlo
+  - ComboBox permite agregar ítems uno por uno (a diferencia de JList que necesita array completo)
+  - Código más simple y directo
+- **Placeholder para selección:**
+  - Agregar ítem "-- Seleccionar usuario --" al inicio de ambos comboboxes
+  - Queda seleccionado por defecto, guía al usuario visualmente
+  - Validar en event handlers que no sea el placeholder (startsWith("--"))
+
+**Validaciones en operaciones de usuarios:**
+- **addNode:**
+  - Validaciones manuales: campo no vacío, formato correcto (empieza con @)
+  - Validación automática: usuario no existe (IllegalArgumentException del grafo)
+- **removeNode:**
+  - Validación manual: campo no vacío
+  - Validación automática: usuario existe (IllegalArgumentException del grafo)
+  - no necesita validar formato @ porque si no existe, lanzará excepción
+
+**Centrado de diálogos JOptionPane:**
+- **Decisión:** Pasar referencia del JFrame padre en lugar de `this` (panel actual)
+- **Implementación:** Agregar parámetro `parentFrame` en `setGraphAndListener()`
+- **Razón:** Diálogos se centran en la aplicación completa, no en el panel lateral
+
+**Validación de arista autoapuntada:**
+- **Decisión:** Validar a nivel de UI, no en la estructura Graph
+- **Razones:**
+  - Graph es una estructura genérica que matemáticamente permite autoapuntados
+  - La restricción es de lógica de negocio (red social), no de estructura de datos
+  - No requiere modificar fases ya completadas
+  - Más flexible: si en el futuro se necesita permitir self-loops, solo se cambia la UI
+- **Implementación:** Validar si los valores de los fields son iguales antes de llamar `graph.addEdge()`
+
+**Patrón de reutilización de código entre menú y panel:**
+- **Decisión:** Extraer lógica de archivo a métodos privados (`loadFile()`, `saveFile()`, `newGraph()`, `exitApplication()`) y extender `GraphUpdateListener` con callbacks para operaciones de archivo
+- **Razones:**
+  - Evitar duplicación entre MenuItems y botones del panel
+  - Centralizar validaciones y lógica compleja
+  - Mantener consistencia de comportamiento
+- **Flujo:** ControlsPanel invoca callback -> SocialNetworkUI ejecuta método privado compartido
+
+**Validación de cambios sin guardar:**
+- **Decisión:** Validar `hasUnsavedChanges` antes de operaciones destructivas (cargar, nuevo grafo, cerrar)
+- **Razón:** Prevenir pérdida accidental de datos
+- **Flag `hasUnsavedChanges`:** Se activa en `onGraphUpdated()`, se desactiva después de guardar/cargar
+
+**Función "Nuevo Grafo":**
+- **Decisión:** Permitir crear grafo vacío sin cargar archivo
+- **Razón:** Usuario puede trabajar desde cero, consistente con diseño de "grafo siempre existe"
+- **Implementación:** Crea `new Graph<>()`, resetea `currentFilePath` a `null`
+
+**Sistema de guardado adaptativo:**
+- **Decisión:** Si `currentFilePath == null` abre Save As dialog, si existe guarda directamente
+- **Razón:** Comportamiento estándar de aplicaciones desktop
+
+**Panel de archivos en ControlsPanel:**
+- **Decisión:** Agregar tercer sub-panel (`filePanel`) con botones de cargar/guardar
+- **Razón:** Acceso rápido sin ir al menú, mantiene arquitectura componencial
+
+**Visualización de componentes en InfoPanel:**
+- **Decisión:** Mostrar componentes en formato de lista plana
+- **Formato:** "Componente X (N usuarios): @user1, @user2, @user3..."
+- **Razones:**
+  - Consistente con el diseño existente (usuarios y relaciones también usan JList)
+  - Toda la información visible sin interacción adicional
+  - Simple de implementar y mantener
+  - Fácil de leer y copiar para análisis
+
+**Manejo de estado del análisis:**
+- **Decisión:** Indicar explícitamente cuando no se ha ejecutado el análisis
+- **Comportamiento:**
+  - Inicial: "Componentes (No analizado)"
+  - Después de ejecutar Kosaraju: "Componentes (N)"
+  - Al modificar el grafo: resetear a "No analizado" (los componentes previos ya no son válidos)
+- **Razón:** Evitar confusión cuando el label muestra "0" vs "análisis no ejecutado"
+
+**Actualización de ruta de archivo en ControlsPanel:**
+- **Decisión:** Centralizar actualización del label de archivo en `updatePanelsInfo()`
+- **Razones:**
+  - Única fuente de verdad para actualizar todos los paneles
+  - Se ejecuta automáticamente en todos los flujos (cargar, guardar, nuevo, modificar)
+  - Mantiene sincronización sin código duplicado
+- **Formato:** "Archivo: ruta/completa" o "Archivo: No asignado" si `currentFilePath == null`
