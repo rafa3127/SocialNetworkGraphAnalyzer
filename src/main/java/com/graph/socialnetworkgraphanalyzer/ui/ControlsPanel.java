@@ -442,11 +442,85 @@ public class ControlsPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_removeUserButtonActionPerformed
 
     private void addRelationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRelationButtonActionPerformed
-        // TODO add your handling code here:
+        String fromUser = (String) fromUserComboBox.getSelectedItem();
+        String toUser = (String) toUserComboBox.getSelectedItem();
+        
+        // Validate selection (check if placeholder is selected)
+        if (fromUser == null || toUser == null || fromUser.startsWith("--") || toUser.startsWith("--")) {
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Por favor selecciona usuarios válidos", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (fromUser == toUser) {
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Un usuario no se puede seguir a sí mismo", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Try to add the edge
+        try {
+            graph.addEdge(fromUser, toUser);
+            
+            // Notify parent that graph was updated
+            if (updateListener != null) {
+                updateListener.onGraphUpdated();
+            }
+            
+            // Show success message
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Relación " + fromUser + " → " + toUser + " agregada exitosamente", 
+                "Éxito", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (IllegalArgumentException e) {
+            // Handle case where nodes don't exist
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Error: " + e.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_addRelationButtonActionPerformed
 
     private void removeRelationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRelationButtonActionPerformed
-        // TODO add your handling code here:
+        String fromUser = (String) fromUserComboBox.getSelectedItem();
+        String toUser = (String) toUserComboBox.getSelectedItem();
+        
+        // Validate selection (check if placeholder is selected)
+        if (fromUser == null || toUser == null || 
+            fromUser.startsWith("--") || toUser.startsWith("--")) {
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Por favor selecciona usuarios válidos", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        try {
+            graph.removeEdge(fromUser, toUser);
+            
+            // Notify parent that graph was updated
+            if (updateListener != null) {
+                updateListener.onGraphUpdated();
+            }
+            
+            // Show success message
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Relación " + fromUser + " → " + toUser + " eliminada exitosamente", 
+                "Éxito", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (IllegalArgumentException e) {
+            // Handle case where edge doesn't exist or nodes don't exist 
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Error: Esta relación no existe" , 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_removeRelationButtonActionPerformed
 
 

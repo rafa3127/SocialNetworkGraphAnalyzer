@@ -467,3 +467,11 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
 - **Implementación:** Agregar parámetro `parentFrame` en `setGraphAndListener()`
 - **Razón:** Diálogos se centran en la aplicación completa, no en el panel lateral
 
+**Validación de arista autoapuntada:**
+- **Decisión:** Validar a nivel de UI, no en la estructura Graph
+- **Razones:**
+  - Graph es una estructura genérica que matemáticamente permite autoapuntados
+  - La restricción es de lógica de negocio (red social), no de estructura de datos
+  - No requiere modificar fases ya completadas
+  - Más flexible: si en el futuro se necesita permitir self-loops, solo se cambia la UI
+- **Implementación:** Validar si los valores de los fields son iguales antes de llamar `graph.addEdge()`
