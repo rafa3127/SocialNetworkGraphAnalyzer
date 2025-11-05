@@ -10,4 +10,6 @@ package com.graph.socialnetworkgraphanalyzer.ui;
  */
 public interface GraphUpdateListener {
     void onGraphUpdated();
+    void onLoadFileRequested();
+    void onSaveFileRequested();
 }

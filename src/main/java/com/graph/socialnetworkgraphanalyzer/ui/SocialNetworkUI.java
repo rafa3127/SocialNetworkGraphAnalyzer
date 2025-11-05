@@ -61,11 +61,148 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         updatePanelsInfo();
     }
     
+    @Override
+    public void onLoadFileRequested() {
+        loadFile();
+    }
+    
+    @Override
+    public void onSaveFileRequested() {
+        saveFile();
+    }
     public void updatePanelsInfo() {
         infoPanel.updateGraphInfo(currentGraph);
         controlsPanel.setGraphAndListener(currentGraph, this);
     }
+    
+    private void loadFile() {
+        
+        // Check for unsaved changes
+        if (hasUnsavedChanges) {
+            int option = JOptionPane.showConfirmDialog(this,
+                "Hay cambios sin guardar en el grafo actual. Abrir un nuevo grafo eliminará los datos del grafo actual. ¿Deseas continuar sin guardar? Se perderán los cambios actuales.",
+                "Cambios sin guardar",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+            
+            if (option != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+        
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Text Files", "txt"));
+        
+        int result = fileChooser.showOpenDialog(this);
+        
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+                currentFilePath = selectedFile.getAbsolutePath();
+                currentGraph = GraphFileManager.loadGraphFromFile(currentFilePath);
+                hasUnsavedChanges = false;
+                
+                // Update InfoPanel
+                updatePanelsInfo();
+                
+                JOptionPane.showMessageDialog(this, 
+                    "Archivo cargado exitosamente: " + currentGraph.getNodeCount() + " usuarios, " + currentGraph.getEdgeCount() + " relaciones", 
+                    "Éxito", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                    
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, 
+                    "Error al cargar archivo: " + ex.getMessage(), 
+                    "Error", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+    
+    private void saveFile() {
+        // If no file path, ask to user
+        if (currentFilePath == null) {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Text Files", "txt"));
+            
+            int result = fileChooser.showSaveDialog(this);
+            
+            if (result == JFileChooser.APPROVE_OPTION) {
+                java.io.File selectedFile = fileChooser.getSelectedFile();
+                currentFilePath = selectedFile.getAbsolutePath();
+                
+                // Add .txt extension if not present
+                if (!currentFilePath.endsWith(".txt")) {
+                    currentFilePath += ".txt";
+                }
+            } else {
+                return;
+            }
+        }
+        
+        // Save to currentFilePath
+        try {
+            GraphFileManager.saveGraphToFile(currentGraph, currentFilePath);
+            hasUnsavedChanges = false;
+            
+            JOptionPane.showMessageDialog(this, 
+                "Archivo guardado exitosamente en:\n" + currentFilePath, 
+                "Éxito", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, 
+                "Error al guardar archivo: " + ex.getMessage(), 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
+    private void exitApplication() {
+        // Check for unsaved changes
+        if (hasUnsavedChanges) {
+            int option = JOptionPane.showConfirmDialog(this,
+                "Hay cambios sin guardar. ¿Deseas salir sin guardar?",
+                "Cambios sin guardar",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+            
+            if (option == JOptionPane.YES_OPTION) {
+                System.exit(0);
+            } else if (option == JOptionPane.NO_OPTION) {
+                saveFile();
+                if (!hasUnsavedChanges) {
+                    System.exit(0);
+                }
+            }
+      
+        } else {
+            System.exit(0);
+        }
+    }
+    
+    private void newGraph() {
+        // Check for unsaved changes (REUTILIZA la misma validación)
+        if (hasUnsavedChanges) {
+            int option = JOptionPane.showConfirmDialog(this,
+                "Hay cambios sin guardar en el grafo actual. Abrir un nuevo grafo eliminará los datos del grafo actual. ¿Deseas continuar sin guardar? Se perderán los cambios actuales.",
+                "Cambios sin guardar",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+            
+            if (option != JOptionPane.YES_OPTION) {
+                return;
+            }
+        }
+        
+        // Create new empty graph
+        currentGraph = new Graph<>();
+        currentFilePath = null;
+        hasUnsavedChanges = false;
+        
+        updatePanelsInfo();
+       
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -80,6 +217,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         fileMenu = new javax.swing.JMenu();
         loadFileMenuItem = new javax.swing.JMenuItem();
         saveFileMenuItem = new javax.swing.JMenuItem();
+        newGraphFileMenuItem = new javax.swing.JMenuItem();
         exitFileMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -117,7 +255,20 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         });
         fileMenu.add(saveFileMenuItem);
 
+        newGraphFileMenuItem.setText("Iniciar nuevo grafo");
+        newGraphFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newGraphFileMenuItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(newGraphFileMenuItem);
+
         exitFileMenuItem.setText("Cerrar");
+        exitFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitFileMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(exitFileMenuItem);
 
         menuBar.add(fileMenu);
@@ -139,38 +290,20 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
     }// </editor-fold>//GEN-END:initComponents
 
     private void loadFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadFileMenuItemActionPerformed
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Text Files", "txt"));
-        
-        int result = fileChooser.showOpenDialog(this);
-        
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                java.io.File selectedFile = fileChooser.getSelectedFile();
-                currentFilePath = selectedFile.getAbsolutePath();
-                currentGraph = GraphFileManager.loadGraphFromFile(currentFilePath);
-                hasUnsavedChanges = false;
-                
-                // Update InfoPanel
-                updatePanelsInfo();
-                
-                JOptionPane.showMessageDialog(this, 
-                    "Archivo cargado exitosamente: " + currentGraph.getNodeCount() + " usuarios, " + currentGraph.getEdgeCount() + " relaciones", 
-                    "Éxito", 
-                    JOptionPane.INFORMATION_MESSAGE);
-                    
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, 
-                    "Error al cargar archivo: " + ex.getMessage(), 
-                    "Error", 
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        }
+        loadFile();
     }//GEN-LAST:event_loadFileMenuItemActionPerformed
 
     private void saveFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveFileMenuItemActionPerformed
-        // TODO add your handling code here:
+        saveFile();
     }//GEN-LAST:event_saveFileMenuItemActionPerformed
+
+    private void exitFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitFileMenuItemActionPerformed
+        exitApplication();
+    }//GEN-LAST:event_exitFileMenuItemActionPerformed
+
+    private void newGraphFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newGraphFileMenuItemActionPerformed
+        newGraph();
+    }//GEN-LAST:event_newGraphFileMenuItemActionPerformed
 
     /**
      * @param args the command line arguments
@@ -203,6 +336,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
     private javax.swing.JMenuItem loadFileMenuItem;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
+    private javax.swing.JMenuItem newGraphFileMenuItem;
     private javax.swing.JMenuItem saveFileMenuItem;
     // End of variables declaration//GEN-END:variables
 }

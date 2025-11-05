@@ -32,6 +32,7 @@ public class ControlsPanel extends javax.swing.JPanel {
         // --------------- CONFIGURE SUB-PANELS LAYOUT --------------- //
         configureUsersPanel();
         configureRelationsPanel();
+        configureFilePanel();
         
         // --------------- ADD SPACE BETWEEN ELEMENTS --------------- //
         // Remove all components first
@@ -40,6 +41,7 @@ public class ControlsPanel extends javax.swing.JPanel {
         // Set preferred size for sub-panels to expand
         usersPanel.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, usersPanel.getPreferredSize().height));
         relationsPanel.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, relationsPanel.getPreferredSize().height));
+        filePanel.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, filePanel.getPreferredSize().height));
         
         // Set new layout
         this.setLayout(new java.awt.GridBagLayout());
@@ -68,8 +70,14 @@ public class ControlsPanel extends javax.swing.JPanel {
         gbc.fill = java.awt.GridBagConstraints.BOTH; // Both directions
         this.add(relationsPanel, gbc);
         
-        // Add empty space at bottom to push everything up
+        // Add file panel
         gbc.gridy = 3;
+        gbc.weighty = 0;
+        gbc.fill = java.awt.GridBagConstraints.BOTH; // Both directions
+        this.add(filePanel, gbc);
+        
+        // Add empty space at bottom to push everything up
+        gbc.gridy = 4;
         gbc.weighty = 1.0;
         this.add(new javax.swing.JPanel(), gbc);
     }
@@ -144,6 +152,31 @@ public class ControlsPanel extends javax.swing.JPanel {
         relationsPanel.add(removeRelationButton, gbc);
     }
     
+    private void configureFilePanel() {
+        filePanel.removeAll();
+        filePanel.setLayout(new java.awt.GridBagLayout());
+        
+        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        gbc.insets = new java.awt.Insets(5, 10, 5, 10);
+        
+        // File path label
+        gbc.gridy = 0;
+        filePanel.add(filePathLabel, gbc);
+        
+        // Load button
+        gbc.gridy = 1;
+        gbc.insets = new java.awt.Insets(10, 10, 5, 10);
+        filePanel.add(loadFileButton, gbc);
+        
+        // Save button
+        gbc.gridy = 2;
+        gbc.insets = new java.awt.Insets(5, 10, 10, 10);
+        filePanel.add(saveFileButton, gbc);
+    }
+    
     // ----------------- END - LAYOUT CONFIG FUNCTIONS -----------------  //
     
     // ----------------- EXTERNAL STATE FROM PARENT HANDLERS -----------------  //
@@ -198,6 +231,10 @@ public class ControlsPanel extends javax.swing.JPanel {
         toUserComboBox = new javax.swing.JComboBox<>();
         addRelationButton = new javax.swing.JButton();
         removeRelationButton = new javax.swing.JButton();
+        filePanel = new javax.swing.JPanel();
+        filePathLabel = new javax.swing.JLabel();
+        loadFileButton = new javax.swing.JButton();
+        saveFileButton = new javax.swing.JButton();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setLayout(new java.awt.GridBagLayout());
@@ -267,7 +304,7 @@ public class ControlsPanel extends javax.swing.JPanel {
                 .addComponent(addUserButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(removeUserButton)
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -323,7 +360,7 @@ public class ControlsPanel extends javax.swing.JPanel {
                         .addComponent(removeRelationButton, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
                         .addComponent(fromUserComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(toUserComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(182, Short.MAX_VALUE))
         );
         relationsPanelLayout.setVerticalGroup(
             relationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -351,6 +388,58 @@ public class ControlsPanel extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(12, 20, 290, 10);
         add(relationsPanel, gridBagConstraints);
+
+        filePanel.setBackground(new java.awt.Color(255, 255, 255));
+        filePanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Gestionar Archivo"));
+
+        filePathLabel.setText("Archivo:");
+
+        loadFileButton.setBackground(new java.awt.Color(59, 169, 156));
+        loadFileButton.setForeground(new java.awt.Color(255, 255, 255));
+        loadFileButton.setText("Cargar archivo");
+        loadFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loadFileButtonActionPerformed(evt);
+            }
+        });
+
+        saveFileButton.setForeground(new java.awt.Color(59, 169, 156));
+        saveFileButton.setText("Guardar grafo");
+        saveFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveFileButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout filePanelLayout = new javax.swing.GroupLayout(filePanel);
+        filePanel.setLayout(filePanelLayout);
+        filePanelLayout.setHorizontalGroup(
+            filePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(filePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(filePanelLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addGroup(filePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(filePathLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(loadFileButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(saveFileButton, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE))
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+        filePanelLayout.setVerticalGroup(
+            filePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(filePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(filePanelLayout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(filePathLabel)
+                    .addGap(41, 41, 41)
+                    .addComponent(loadFileButton)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(saveFileButton)
+                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+        );
+
+        add(filePanel, new java.awt.GridBagConstraints());
     }// </editor-fold>//GEN-END:initComponents
 
     private void userTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userTextActionPerformed
@@ -523,15 +612,31 @@ public class ControlsPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_removeRelationButtonActionPerformed
 
+    private void loadFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadFileButtonActionPerformed
+        if (updateListener != null) {
+            updateListener.onLoadFileRequested();
+        }
+    }//GEN-LAST:event_loadFileButtonActionPerformed
+
+    private void saveFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveFileButtonActionPerformed
+        if (updateListener != null) {
+            updateListener.onSaveFileRequested();
+        }
+    }//GEN-LAST:event_saveFileButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton addRelationButton;
     private javax.swing.JButton addUserButton;
+    private javax.swing.JPanel filePanel;
+    private javax.swing.JLabel filePathLabel;
     private javax.swing.JComboBox<String> fromUserComboBox;
     private javax.swing.JLabel fromUserLabel;
+    private javax.swing.JButton loadFileButton;
     private javax.swing.JPanel relationsPanel;
     private javax.swing.JButton removeRelationButton;
     private javax.swing.JButton removeUserButton;
+    private javax.swing.JButton saveFileButton;
     private javax.swing.JLabel titleLabel;
     private javax.swing.JComboBox<String> toUserComboBox;
     private javax.swing.JLabel toUserLabel;

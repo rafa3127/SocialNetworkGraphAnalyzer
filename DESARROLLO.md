@@ -88,10 +88,10 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Tareas:**
 - [x] Crear JFrame principal en paquete `ui`
 - [x] Diseñar layout con NetBeans GUI Builder (controles, visualización placeholder, información)
-- [ ] Implementar controles para agregar/eliminar usuarios
-- [ ] Implementar controles para agregar/eliminar relaciones
+- [x] Implementar controles para agregar/eliminar usuarios
+- [x] Implementar controles para agregar/eliminar relaciones
 - [x] Implementar carga de archivo con JFileChooser
-- [ ] Implementar guardado de archivo
+- [x] Implementar guardado de archivo
 - [ ] Integrar ejecución de Kosaraju y mostrar resultados
 - [ ] Testing manual de funcionalidades
 
@@ -475,3 +475,29 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - No requiere modificar fases ya completadas
   - Más flexible: si en el futuro se necesita permitir self-loops, solo se cambia la UI
 - **Implementación:** Validar si los valores de los fields son iguales antes de llamar `graph.addEdge()`
+
+**Patrón de reutilización de código entre menú y panel:**
+- **Decisión:** Extraer lógica de archivo a métodos privados (`loadFile()`, `saveFile()`, `newGraph()`, `exitApplication()`) y extender `GraphUpdateListener` con callbacks para operaciones de archivo
+- **Razones:**
+  - Evitar duplicación entre MenuItems y botones del panel
+  - Centralizar validaciones y lógica compleja
+  - Mantener consistencia de comportamiento
+- **Flujo:** ControlsPanel invoca callback -> SocialNetworkUI ejecuta método privado compartido
+
+**Validación de cambios sin guardar:**
+- **Decisión:** Validar `hasUnsavedChanges` antes de operaciones destructivas (cargar, nuevo grafo, cerrar)
+- **Razón:** Prevenir pérdida accidental de datos
+- **Flag `hasUnsavedChanges`:** Se activa en `onGraphUpdated()`, se desactiva después de guardar/cargar
+
+**Función "Nuevo Grafo":**
+- **Decisión:** Permitir crear grafo vacío sin cargar archivo
+- **Razón:** Usuario puede trabajar desde cero, consistente con diseño de "grafo siempre existe"
+- **Implementación:** Crea `new Graph<>()`, resetea `currentFilePath` a `null`
+
+**Sistema de guardado adaptativo:**
+- **Decisión:** Si `currentFilePath == null` abre Save As dialog, si existe guarda directamente
+- **Razón:** Comportamiento estándar de aplicaciones desktop
+
+**Panel de archivos en ControlsPanel:**
+- **Decisión:** Agregar tercer sub-panel (`filePanel`) con botones de cargar/guardar
+- **Razón:** Acceso rápido sin ir al menú, mantiene arquitectura componencial
