@@ -21,6 +21,7 @@ public class SocialNetworkUI extends javax.swing.JFrame {
     private String currentFilePath;
     private boolean hasUnsavedChanges;
     private InfoPanel infoPanel;
+    private ControlsPanel controlsPanel;
 
     /**
      * Creates new form SocialNetworkUI
@@ -40,6 +41,11 @@ public class SocialNetworkUI extends javax.swing.JFrame {
         infoPanel = new InfoPanel();
         infoPanel.setPreferredSize(new java.awt.Dimension(280, 0));
         mainPanel.add(infoPanel, java.awt.BorderLayout.EAST);
+        
+        // Create and add controls panel
+        controlsPanel = new ControlsPanel(currentGraph);
+        controlsPanel.setPreferredSize(new java.awt.Dimension(300, 0));
+        mainPanel.add(controlsPanel, java.awt.BorderLayout.WEST);
         
         // Configure window
         this.setSize(1200, 700); 

@@ -114,7 +114,7 @@ public class InfoPanel extends javax.swing.JPanel {
         titleLabel.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
         titleLabel.setForeground(new java.awt.Color(59, 169, 156));
         titleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        titleLabel.setText("Informacion");
+        titleLabel.setText("Información");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;

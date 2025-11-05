@@ -3,20 +3,140 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package com.graph.socialnetworkgraphanalyzer.ui;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
 
 /**
  *
  * @author rafaelc3127
  */
 public class ControlsPanel extends javax.swing.JPanel {
+    
+    private Graph<String> graph;
 
     /**
      * Creates new form ControlsPanel
      */
-    public ControlsPanel() {
+    public ControlsPanel(Graph<String> graph) {
+        this.graph = graph;
         initComponents();
+        
+        // --------------- INITIALIZE LISTS VALUES --------------- //
+        fromUserComboBox.removeAllItems();
+        toUserComboBox.removeAllItems();
+        
+        // --------------- CONFIGURE SUB-PANELS LAYOUT --------------- //
+        configureUsersPanel();
+        configureRelationsPanel();
+        
+        // --------------- ADD SPACE BETWEEN ELEMENTS --------------- //
+        // Remove all components first
+        this.removeAll();
+        
+        // Set preferred size for sub-panels to expand
+        usersPanel.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, usersPanel.getPreferredSize().height));
+        relationsPanel.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, relationsPanel.getPreferredSize().height));
+        
+        // Set new layout
+        this.setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gbc.fill = java.awt.GridBagConstraints.BOTH; // Changed to BOTH
+        gbc.weightx = 1.0;
+        gbc.insets = new java.awt.Insets(10, 10, 10, 10);
+        
+        // Add title
+        gbc.gridy = 0;
+        gbc.weighty = 0;
+        gbc.fill = java.awt.GridBagConstraints.HORIZONTAL; // Title only horizontal
+        this.add(titleLabel, gbc);
+        
+        // Add users panel
+        gbc.gridy = 1;
+        gbc.weighty = 0;
+        gbc.fill = java.awt.GridBagConstraints.BOTH; // Both directions
+        this.add(usersPanel, gbc);
+        
+        // Add relations panel
+        gbc.gridy = 2;
+        gbc.weighty = 0;
+        gbc.fill = java.awt.GridBagConstraints.BOTH; // Both directions
+        this.add(relationsPanel, gbc);
+        
+        // Add empty space at bottom to push everything up
+        gbc.gridy = 3;
+        gbc.weighty = 1.0;
+        this.add(new javax.swing.JPanel(), gbc);
+    }
+    
+    private void configureUsersPanel() {
+        usersPanel.removeAll();
+        usersPanel.setLayout(new java.awt.GridBagLayout());
+        
+        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        gbc.insets = new java.awt.Insets(5, 10, 5, 10);
+        
+        // User label
+        gbc.gridy = 0;
+        usersPanel.add(userLabel, gbc);
+        
+        // User text field
+        gbc.gridy = 1;
+        usersPanel.add(userText, gbc);
+        
+        // Add button
+        gbc.gridy = 2;
+        gbc.insets = new java.awt.Insets(10, 10, 5, 10);
+        usersPanel.add(addUserButton, gbc);
+        
+        // Remove button
+        gbc.gridy = 3;
+        gbc.insets = new java.awt.Insets(5, 10, 10, 10);
+        usersPanel.add(removeUserButton, gbc);
     }
 
+    private void configureRelationsPanel() {
+        relationsPanel.removeAll();
+        relationsPanel.setLayout(new java.awt.GridBagLayout());
+        
+        java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        gbc.insets = new java.awt.Insets(5, 10, 5, 10);
+        
+        // From label
+        gbc.gridy = 0;
+        relationsPanel.add(fromUserLabel, gbc);
+        
+        // From combobox
+        gbc.gridy = 1;
+        relationsPanel.add(fromUserComboBox, gbc);
+        
+        // To label
+        gbc.gridy = 2;
+        gbc.insets = new java.awt.Insets(10, 10, 5, 10);
+        relationsPanel.add(toUserLabel, gbc);
+        
+        // To combobox
+        gbc.gridy = 3;
+        gbc.insets = new java.awt.Insets(5, 10, 5, 10);
+        relationsPanel.add(toUserComboBox, gbc);
+        
+        // Add button
+        gbc.gridy = 4;
+        gbc.insets = new java.awt.Insets(10, 10, 5, 10);
+        relationsPanel.add(addRelationButton, gbc);
+        
+        // Remove button
+        gbc.gridy = 5;
+        gbc.insets = new java.awt.Insets(5, 10, 10, 10);
+        relationsPanel.add(removeRelationButton, gbc);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -25,22 +145,210 @@ public class ControlsPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
-        setBackground(new java.awt.Color(255, 0, 204));
+        titleLabel = new javax.swing.JLabel();
+        usersPanel = new javax.swing.JPanel();
+        userLabel = new javax.swing.JLabel();
+        userText = new javax.swing.JTextField();
+        addUserButton = new javax.swing.JButton();
+        removeUserButton = new javax.swing.JButton();
+        relationsPanel = new javax.swing.JPanel();
+        fromUserLabel = new javax.swing.JLabel();
+        fromUserComboBox = new javax.swing.JComboBox<>();
+        toUserLabel = new javax.swing.JLabel();
+        toUserComboBox = new javax.swing.JComboBox<>();
+        addRelationButton = new javax.swing.JButton();
+        removeRelationButton = new javax.swing.JButton();
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+        setBackground(new java.awt.Color(255, 255, 255));
+        setLayout(new java.awt.GridBagLayout());
+
+        titleLabel.setFont(new java.awt.Font("Helvetica Neue", 1, 18)); // NOI18N
+        titleLabel.setForeground(new java.awt.Color(59, 169, 156));
+        titleLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        titleLabel.setText("Controles");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.ipadx = 282;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 14, 0, 0);
+        add(titleLabel, gridBagConstraints);
+
+        usersPanel.setBackground(new java.awt.Color(255, 255, 255));
+        usersPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Gestionar Usuarios"));
+
+        userLabel.setText("Usuario");
+
+        userText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                userTextActionPerformed(evt);
+            }
+        });
+
+        addUserButton.setBackground(new java.awt.Color(59, 169, 156));
+        addUserButton.setForeground(new java.awt.Color(255, 255, 255));
+        addUserButton.setText("Agregar");
+        addUserButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addUserButtonActionPerformed(evt);
+            }
+        });
+
+        removeUserButton.setBackground(new java.awt.Color(255, 102, 102));
+        removeUserButton.setForeground(new java.awt.Color(255, 255, 255));
+        removeUserButton.setText("Eliminar");
+        removeUserButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeUserButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout usersPanelLayout = new javax.swing.GroupLayout(usersPanel);
+        usersPanel.setLayout(usersPanelLayout);
+        usersPanelLayout.setHorizontalGroup(
+            usersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(usersPanelLayout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addGroup(usersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(userLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(userText)
+                    .addComponent(addUserButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(removeUserButton, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+        usersPanelLayout.setVerticalGroup(
+            usersPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(usersPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(userLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(userText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(addUserButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(removeUserButton)
+                .addContainerGap(19, Short.MAX_VALUE))
         );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 22;
+        gridBagConstraints.ipady = 13;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(6, 20, 0, 10);
+        add(usersPanel, gridBagConstraints);
+
+        relationsPanel.setBackground(new java.awt.Color(255, 255, 255));
+        relationsPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Gestionar Relaciones"));
+
+        fromUserLabel.setText("Desde");
+
+        fromUserComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        toUserLabel.setText("Hacia");
+
+        toUserComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
+        addRelationButton.setBackground(new java.awt.Color(59, 169, 156));
+        addRelationButton.setForeground(new java.awt.Color(255, 255, 255));
+        addRelationButton.setText("Agregar");
+        addRelationButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addRelationButtonActionPerformed(evt);
+            }
+        });
+
+        removeRelationButton.setBackground(new java.awt.Color(255, 102, 102));
+        removeRelationButton.setForeground(new java.awt.Color(255, 255, 255));
+        removeRelationButton.setText("Eliminar");
+        removeRelationButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                removeRelationButtonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout relationsPanelLayout = new javax.swing.GroupLayout(relationsPanel);
+        relationsPanel.setLayout(relationsPanelLayout);
+        relationsPanelLayout.setHorizontalGroup(
+            relationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(relationsPanelLayout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addGroup(relationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(toUserLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(relationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(fromUserLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(addRelationButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(removeRelationButton, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+                        .addComponent(fromUserComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(toUserComboBox, javax.swing.GroupLayout.Alignment.TRAILING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap(28, Short.MAX_VALUE))
+        );
+        relationsPanelLayout.setVerticalGroup(
+            relationsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(relationsPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(fromUserLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(fromUserComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(toUserLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(toUserComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(addRelationButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(removeRelationButton)
+                .addGap(15, 15, 15))
+        );
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.ipadx = 22;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.insets = new java.awt.Insets(12, 20, 290, 10);
+        add(relationsPanel, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void userTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userTextActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_userTextActionPerformed
+
+    private void addUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addUserButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addUserButtonActionPerformed
+
+    private void removeUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeUserButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_removeUserButtonActionPerformed
+
+    private void addRelationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRelationButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_addRelationButtonActionPerformed
+
+    private void removeRelationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeRelationButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_removeRelationButtonActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton addRelationButton;
+    private javax.swing.JButton addUserButton;
+    private javax.swing.JComboBox<String> fromUserComboBox;
+    private javax.swing.JLabel fromUserLabel;
+    private javax.swing.JPanel relationsPanel;
+    private javax.swing.JButton removeRelationButton;
+    private javax.swing.JButton removeUserButton;
+    private javax.swing.JLabel titleLabel;
+    private javax.swing.JComboBox<String> toUserComboBox;
+    private javax.swing.JLabel toUserLabel;
+    private javax.swing.JLabel userLabel;
+    private javax.swing.JTextField userText;
+    private javax.swing.JPanel usersPanel;
     // End of variables declaration//GEN-END:variables
 }
