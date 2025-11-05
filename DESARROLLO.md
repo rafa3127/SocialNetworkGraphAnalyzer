@@ -86,11 +86,11 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Crear UI funcional con Swing usando NetBeans GUI Builder
 
 **Tareas:**
-- [ ] Crear JFrame principal en paquete `ui`
-- [ ] Diseñar layout con NetBeans GUI Builder (controles, visualización placeholder, información)
+- [x] Crear JFrame principal en paquete `ui`
+- [x] Diseñar layout con NetBeans GUI Builder (controles, visualización placeholder, información)
 - [ ] Implementar controles para agregar/eliminar usuarios
 - [ ] Implementar controles para agregar/eliminar relaciones
-- [ ] Implementar carga de archivo con JFileChooser
+- [x] Implementar carga de archivo con JFileChooser
 - [ ] Implementar guardado de archivo
 - [ ] Integrar ejecución de Kosaraju y mostrar resultados
 - [ ] Testing manual de funcionalidades
@@ -363,4 +363,62 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Sin "usuarios": Crea grafo vacío (0 nodos, 0 aristas)
   - Sin "relaciones": Crea grafo solo con nodos (N nodos, 0 aristas)
 - **Razón:** Flexibilidad para casos edge (archivos vacíos, grafos sin relaciones)
+
+### Decisiones sobre interfaz gráfica (Fase 4)
+
+**Arquitectura componencial vs clase monolítica:**
+- **Decisión:** Usar arquitectura componencial - cada sección de UI es una clase JPanel separada
+- **Razones:**
+  - Código más organizado y mantenible (evita clase de muchas líneas)
+  - Cada panel se diseña independientemente en NetBeans GUI Builder (hasta donde me es posible, Tambien se añaden props programaticamente)
+  - Facilita testing y debugging
+  - Natural para desarrollador con mi experiencia en frameworks componenciales
+- **Alternativa considerada:** Todo en una sola clase 
+  - Ventajas: Más simple, menos archivos, estándar en proyectos pequeños Swing
+  - Descartado: Preferencia por código modular
+- **Estructura:**
+  ```
+  SocialNetworkUI (JFrame) - orquestador principal
+    ├── InfoPanel (JPanel) - muestra información 
+    ├── ControlsPanel (JPanel) - controles de modificación (futuro)
+    └── VisualizationPanel (JPanel) - visualización GraphStream (futuro)
+  ```
+
+**Comunicación entre componentes:**
+- **Decisión:** Métodos públicos que reciben el grafo como parámetro
+- **Estructura:** `infoPanel.updateGraphInfo(currentGraph)`
+- **Razones:**
+  - Simple y directo
+  - No requiere interfaces complejas o listeners para este caso de uso
+  - Desacoplado: InfoPanel no necesita conocer detalles del JFrame principal
+- **Alternativas consideradas:**
+  - Pasar grafo en constructor: más acoplado, menos flexible
+  - Callbacks complejos: over-engineering para caso particular
+- **Flujo de datos:** SocialNetworkUI (dueño del estado) -> llama métodos públicos -> paneles se actualizan
+
+**Ensamblado de componentes:**
+- **Decisión:** Ensamblar paneles programáticamente en constructor de SocialNetworkUI
+- **Razones:**
+  - NetBeans GUI Builder tiene limitaciones con BorderLayout dinámico
+  - Más control sobre posicionamiento y tamaños
+  - Cada panel se diseña cómodamente en GUI Builder por separado
+- **Nota importante:** `initComponents()` es generado por NetBeans - NUNCA modificar. Toda lógica va después en el constructor
+
+**InfoPanel - Diseño y actualización:**
+- **Layout:** GridBagLayout para control preciso de posicionamiento y expansión
+
+**Carga de archivos con JFileChooser:**
+- **Implementación:** Método `loadFile()` privado llamado desde MenuItem
+- **Flujo:**
+  1. Abrir JFileChooser con filtro .txt
+  2. Si usuario selecciona archivo -> `GraphFileManager.loadGraphFromFile()`
+  3. Actualizar `currentGraph` y `currentFilePath`
+  4. Llamar `infoPanel.updateGraphInfo(currentGraph)`
+  5. Mostrar diálogo de éxito con conteos
+- **Manejo de errores:** try-catch con JOptionPane.showMessageDialog para mostrar errores al usuario
+
+**Trade-offs aceptados:**
+- Arquitectura componencial toma más tiempo inicialmente pero mejora mantenibilidad
+- Mezclar GUI Builder con código manual (ensamblado) es necesario por limitaciones de NetBeans
+- Algunos estilos visuales se configuran por código en lugar de GUI Builder (más control, menos visual)
 
