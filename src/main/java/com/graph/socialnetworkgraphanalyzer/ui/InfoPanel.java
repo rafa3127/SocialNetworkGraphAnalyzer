@@ -20,6 +20,8 @@ public class InfoPanel extends javax.swing.JPanel {
         // --------------- INITIALIZE LISTS VALUES --------------- //
         usersList.setListData(new String[0]);
         relationsList.setListData(new String[0]);
+        componentsList.setListData(new String[0]);
+        componentsCountLabel.setText("Componentes (0 - No analizado)");
         
         // --------------- ADD SPACE BETWEEN ELEMENTS --------------- //
         this.setLayout(new java.awt.GridBagLayout());
@@ -54,6 +56,16 @@ public class InfoPanel extends javax.swing.JPanel {
         gbc.weighty = 1.0;
         this.add(relationsListScrollPane, gbc);
         
+        // Add components count label
+        gbc.gridy = 5;
+        gbc.weighty = 0;
+        this.add(componentsCountLabel, gbc);
+        
+        // Add components list
+        gbc.gridy = 6;
+        gbc.weighty = 1.0;
+        this.add(componentsScrollPane, gbc);
+        
     }
     
     public void updateGraphInfo(Graph<String> graph) {
@@ -87,6 +99,39 @@ public class InfoPanel extends javax.swing.JPanel {
         
         relationsList.setListData(relationsArray);
         relationsCountLabel.setText("Relaciones (" + edges.getSize() + "):");
+        componentsList.setListData(new String[0]);
+        componentsCountLabel.setText("Componentes (0 - No analizado)");
+    }
+    
+    public void updateComponents(LinkedList<LinkedList<String>> components) {
+        String[] componentsArray = new String[components.getSize()];
+        Node<LinkedList<String>> current = components.getHead();
+        int index = 0;
+        int componentNumber = 1;
+        
+        while (current != null) {
+            LinkedList<String> component = current.getData();
+            
+            String result = "Componente " + componentNumber + 
+                " (" + component.getSize() + " usuario" + (component.getSize() != 1 ? "s" : "") + "): ";
+            
+            Node<String> userNode = component.getHead();
+            while (userNode != null) {
+                result += userNode.getData();
+                if (userNode.getNext() != null) {
+                    result += ", ";
+                }
+                userNode = userNode.getNext();
+            }
+            
+            componentsArray[index] = result;
+            current = current.getNext();
+            index++;
+            componentNumber++;
+        }
+        
+        componentsList.setListData(componentsArray);
+        componentsCountLabel.setText("Componentes (" + components.getSize() + "):");
     }
 
     /**
@@ -106,6 +151,9 @@ public class InfoPanel extends javax.swing.JPanel {
         relationsCountLabel = new javax.swing.JLabel();
         relationsListScrollPane = new javax.swing.JScrollPane();
         relationsList = new javax.swing.JList<>();
+        componentsCountLabel = new javax.swing.JLabel();
+        componentsScrollPane = new javax.swing.JScrollPane();
+        componentsList = new javax.swing.JList<>();
 
         setBackground(new java.awt.Color(255, 255, 255));
         setSize(new java.awt.Dimension(300, 700));
@@ -178,6 +226,22 @@ public class InfoPanel extends javax.swing.JPanel {
         });
         relationsListScrollPane.setViewportView(relationsList);
 
+        add(relationsListScrollPane, new java.awt.GridBagConstraints());
+
+        componentsCountLabel.setFont(new java.awt.Font("Helvetica Neue", 1, 14)); // NOI18N
+        componentsCountLabel.setText("Componentes (0)");
+        add(componentsCountLabel, new java.awt.GridBagConstraints());
+
+        componentsScrollPane.setBackground(new java.awt.Color(255, 255, 255));
+        componentsScrollPane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        componentsList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        componentsScrollPane.setViewportView(componentsList);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 4;
@@ -189,11 +253,14 @@ public class InfoPanel extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(12, 12, 269, 0);
-        add(relationsListScrollPane, gridBagConstraints);
+        add(componentsScrollPane, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel componentsCountLabel;
+    private javax.swing.JList<String> componentsList;
+    private javax.swing.JScrollPane componentsScrollPane;
     private javax.swing.JLabel relationsCountLabel;
     private javax.swing.JList<String> relationsList;
     private javax.swing.JScrollPane relationsListScrollPane;

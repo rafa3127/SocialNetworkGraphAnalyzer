@@ -92,8 +92,8 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 - [x] Implementar controles para agregar/eliminar relaciones
 - [x] Implementar carga de archivo con JFileChooser
 - [x] Implementar guardado de archivo
-- [ ] Integrar ejecución de Kosaraju y mostrar resultados
-- [ ] Testing manual de funcionalidades
+- [x] Integrar ejecución de Kosaraju y mostrar resultados
+- [x] Testing manual de funcionalidades
 
 **Entregable:** Interfaz gráfica completamente funcional
 
@@ -501,3 +501,28 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
 **Panel de archivos en ControlsPanel:**
 - **Decisión:** Agregar tercer sub-panel (`filePanel`) con botones de cargar/guardar
 - **Razón:** Acceso rápido sin ir al menú, mantiene arquitectura componencial
+
+**Visualización de componentes en InfoPanel:**
+- **Decisión:** Mostrar componentes en formato de lista plana
+- **Formato:** "Componente X (N usuarios): @user1, @user2, @user3..."
+- **Razones:**
+  - Consistente con el diseño existente (usuarios y relaciones también usan JList)
+  - Toda la información visible sin interacción adicional
+  - Simple de implementar y mantener
+  - Fácil de leer y copiar para análisis
+
+**Manejo de estado del análisis:**
+- **Decisión:** Indicar explícitamente cuando no se ha ejecutado el análisis
+- **Comportamiento:**
+  - Inicial: "Componentes (No analizado)"
+  - Después de ejecutar Kosaraju: "Componentes (N)"
+  - Al modificar el grafo: resetear a "No analizado" (los componentes previos ya no son válidos)
+- **Razón:** Evitar confusión cuando el label muestra "0" vs "análisis no ejecutado"
+
+**Actualización de ruta de archivo en ControlsPanel:**
+- **Decisión:** Centralizar actualización del label de archivo en `updatePanelsInfo()`
+- **Razones:**
+  - Única fuente de verdad para actualizar todos los paneles
+  - Se ejecuta automáticamente en todos los flujos (cargar, guardar, nuevo, modificar)
+  - Mantiene sincronización sin código duplicado
+- **Formato:** "Archivo: ruta/completa" o "Archivo: No asignado" si `currentFilePath == null`

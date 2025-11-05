@@ -43,6 +43,21 @@
             </MenuItem>
           </SubComponents>
         </Menu>
+        <Menu class="javax.swing.JMenu" name="analysisMenu">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="An&#xe1;lisis"/>
+          </Properties>
+          <SubComponents>
+            <MenuItem class="javax.swing.JMenuItem" name="kosarajuAnalysisMenuItem">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Encontrar SCC (Kosaraju)"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="kosarajuAnalysisMenuItemActionPerformed"/>
+              </Events>
+            </MenuItem>
+          </SubComponents>
+        </Menu>
       </SubComponents>
     </Menu>
   </NonVisualComponents>

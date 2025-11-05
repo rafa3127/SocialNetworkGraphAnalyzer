@@ -206,6 +206,14 @@ public class ControlsPanel extends javax.swing.JPanel {
         }
     }
     
+    public void updateFilePath(String filePath) {
+        if (filePath == null) {
+            filePathLabel.setText("Archivo: No asignado");
+        } else {
+             String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+            filePathLabel.setText("Archivo: " + fileName);
+        }
+    }
     // -------------- END - EXTERNAL STATE FROM PARENT HANDLERS --------------  //
     
     /**

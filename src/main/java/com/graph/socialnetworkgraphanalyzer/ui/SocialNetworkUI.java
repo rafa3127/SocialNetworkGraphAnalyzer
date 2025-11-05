@@ -7,7 +7,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
 import com.graph.socialnetworkgraphanalyzer.io.GraphFileManager;
+import com.graph.socialnetworkgraphanalyzer.algorithm.Kosaraju;
 
 /**
  *
@@ -47,6 +49,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         controlsPanel.setPreferredSize(new java.awt.Dimension(300, 0));
         mainPanel.add(controlsPanel, java.awt.BorderLayout.WEST);
         controlsPanel.setGraphAndListener(currentGraph, this);
+        controlsPanel.updateFilePath(currentFilePath);
         
         // Configure window
         this.setSize(1200, 700); 
@@ -73,6 +76,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
     public void updatePanelsInfo() {
         infoPanel.updateGraphInfo(currentGraph);
         controlsPanel.setGraphAndListener(currentGraph, this);
+        controlsPanel.updateFilePath(currentFilePath);
     }
     
     private void loadFile() {
@@ -156,6 +160,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
                 "Error", 
                 JOptionPane.ERROR_MESSAGE);
         }
+        controlsPanel.updateFilePath(currentFilePath);
     }
 
     private void exitApplication() {
@@ -203,6 +208,29 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         updatePanelsInfo();
        
     }
+    
+    private void findComponentsWithKosaraju () {
+        // Check if graph has nodes
+        if (currentGraph.getNodeCount() == 0) {
+            JOptionPane.showMessageDialog(this,
+                "El grafo está vacío. Agrega usuarios y relaciones antes de analizar.",
+                "Grafo vacío",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Execute Kosaraju algorithm
+        LinkedList<LinkedList<String>> components = Kosaraju.findSCC(currentGraph);
+        
+        // Update InfoPanel with components
+        infoPanel.updateComponents(components);
+        
+        // Show success message
+        JOptionPane.showMessageDialog(this,
+            "Análisis completado: se encontraron " + components.getSize() + " componente(s) fuertemente conectado(s)",
+            "Análisis exitoso",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -219,6 +247,8 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         saveFileMenuItem = new javax.swing.JMenuItem();
         newGraphFileMenuItem = new javax.swing.JMenuItem();
         exitFileMenuItem = new javax.swing.JMenuItem();
+        analysisMenu = new javax.swing.JMenu();
+        kosarajuAnalysisMenuItem = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Social Network Graph Analyzer");
@@ -273,6 +303,18 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
 
         menuBar.add(fileMenu);
 
+        analysisMenu.setText("Análisis");
+
+        kosarajuAnalysisMenuItem.setText("Encontrar SCC (Kosaraju)");
+        kosarajuAnalysisMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                kosarajuAnalysisMenuItemActionPerformed(evt);
+            }
+        });
+        analysisMenu.add(kosarajuAnalysisMenuItem);
+
+        menuBar.add(analysisMenu);
+
         setJMenuBar(menuBar);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -305,6 +347,10 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         newGraph();
     }//GEN-LAST:event_newGraphFileMenuItemActionPerformed
 
+    private void kosarajuAnalysisMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_kosarajuAnalysisMenuItemActionPerformed
+        findComponentsWithKosaraju();
+    }//GEN-LAST:event_kosarajuAnalysisMenuItemActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -331,8 +377,10 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu analysisMenu;
     private javax.swing.JMenuItem exitFileMenuItem;
     private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenuItem kosarajuAnalysisMenuItem;
     private javax.swing.JMenuItem loadFileMenuItem;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
