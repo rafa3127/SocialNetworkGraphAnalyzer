@@ -13,7 +13,7 @@ import com.graph.socialnetworkgraphanalyzer.io.GraphFileManager;
  *
  * @author rafaelc3127
  */
-public class SocialNetworkUI extends javax.swing.JFrame {
+public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateListener {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SocialNetworkUI.class.getName());
     
@@ -43,13 +43,27 @@ public class SocialNetworkUI extends javax.swing.JFrame {
         mainPanel.add(infoPanel, java.awt.BorderLayout.EAST);
         
         // Create and add controls panel
-        controlsPanel = new ControlsPanel(currentGraph);
+        controlsPanel = new ControlsPanel();
         controlsPanel.setPreferredSize(new java.awt.Dimension(300, 0));
         mainPanel.add(controlsPanel, java.awt.BorderLayout.WEST);
+        controlsPanel.setGraphAndListener(currentGraph, this);
         
         // Configure window
         this.setSize(1200, 700); 
         this.setLocationRelativeTo(null);
+    }
+    
+    @Override
+    public void onGraphUpdated() {
+        hasUnsavedChanges = true;
+        
+        // update panels
+        updatePanelsInfo();
+    }
+    
+    public void updatePanelsInfo() {
+        infoPanel.updateGraphInfo(currentGraph);
+        controlsPanel.setGraphAndListener(currentGraph, this);
     }
 
     /**
@@ -138,7 +152,7 @@ public class SocialNetworkUI extends javax.swing.JFrame {
                 hasUnsavedChanges = false;
                 
                 // Update InfoPanel
-                infoPanel.updateGraphInfo(currentGraph);
+                updatePanelsInfo();
                 
                 JOptionPane.showMessageDialog(this, 
                     "Archivo cargado exitosamente: " + currentGraph.getNodeCount() + " usuarios, " + currentGraph.getEdgeCount() + " relaciones", 

@@ -422,3 +422,48 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
 - Mezclar GUI Builder con código manual (ensamblado) es necesario por limitaciones de NetBeans
 - Algunos estilos visuales se configuran por código en lugar de GUI Builder (más control, menos visual)
 
+**Patrón de comunicación hijo -> padre:**
+- **Decisión:** Implementar interface `GraphUpdateListener` con método `onGraphUpdated()`
+- **Razones:**
+  - En el caso de ControlsPanel, no se pudo solo pasar el grafo como estaba previsto en decisiones anteriores, ya que se manipula el grafo. Se debe usar un listener para notificar cambios al padre y propagarlos
+  - Simple: Solo una interface con un método
+  - Escalable: Fácil agregar más listeners si es necesario
+  - Patrón estándar: Observer/Listener
+
+**Manejo de estado del grafo:**
+- **Decisión:** Grafo siempre existe (nunca null), se inicializa como `new Graph<>()` vacío
+- **Razones:**
+  - Usuario puede empezar agregando usuarios sin cargar archivo
+  - Simplifica código (no validar `graph == null` en cada operación)
+  - Comportamiento más natural y flexible
+- **Implicación:** `currentFilePath` puede ser null si no se ha cargado/guardado archivo
+- **Manejo de guardado sin archivo:**
+  - Si `currentFilePath == null` al guardar, abrir JFileChooser (Save As dialog) (Por implementar al momento de escribir esta nota)
+  - Guardados subsecuentes usan la misma ruta
+- **Comportamiento estándar:** Similar a editores de texto (nuevo documento -> guardar -> pedir ruta)
+
+**Actualización de ComboBoxes en ControlsPanel:**
+- **Decisión:** Iterar LinkedList una sola vez agregando ítems directamente con `addItem()`
+- **Razones:**
+  - Más eficiente que crear array temporal y volver a iterarlo
+  - ComboBox permite agregar ítems uno por uno (a diferencia de JList que necesita array completo)
+  - Código más simple y directo
+- **Placeholder para selección:**
+  - Agregar ítem "-- Seleccionar usuario --" al inicio de ambos comboboxes
+  - Queda seleccionado por defecto, guía al usuario visualmente
+  - Validar en event handlers que no sea el placeholder (startsWith("--"))
+
+**Validaciones en operaciones de usuarios:**
+- **addNode:**
+  - Validaciones manuales: campo no vacío, formato correcto (empieza con @)
+  - Validación automática: usuario no existe (IllegalArgumentException del grafo)
+- **removeNode:**
+  - Validación manual: campo no vacío
+  - Validación automática: usuario existe (IllegalArgumentException del grafo)
+  - no necesita validar formato @ porque si no existe, lanzará excepción
+
+**Centrado de diálogos JOptionPane:**
+- **Decisión:** Pasar referencia del JFrame padre en lugar de `this` (panel actual)
+- **Implementación:** Agregar parámetro `parentFrame` en `setGraphAndListener()`
+- **Razón:** Diálogos se centran en la aplicación completa, no en el panel lateral
+

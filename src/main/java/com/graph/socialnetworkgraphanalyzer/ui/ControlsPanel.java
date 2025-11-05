@@ -4,6 +4,9 @@
  */
 package com.graph.socialnetworkgraphanalyzer.ui;
 import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -12,11 +15,13 @@ import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph;
 public class ControlsPanel extends javax.swing.JPanel {
     
     private Graph<String> graph;
+    private GraphUpdateListener updateListener;
+    private javax.swing.JFrame parentFrame;
 
     /**
      * Creates new form ControlsPanel
      */
-    public ControlsPanel(Graph<String> graph) {
+    public ControlsPanel() {
         this.graph = graph;
         initComponents();
         
@@ -68,6 +73,8 @@ public class ControlsPanel extends javax.swing.JPanel {
         gbc.weighty = 1.0;
         this.add(new javax.swing.JPanel(), gbc);
     }
+    
+    // ----------------- LAYOUT CONFIG FUNCTIONS -----------------  //
     
     private void configureUsersPanel() {
         usersPanel.removeAll();
@@ -136,6 +143,37 @@ public class ControlsPanel extends javax.swing.JPanel {
         gbc.insets = new java.awt.Insets(5, 10, 10, 10);
         relationsPanel.add(removeRelationButton, gbc);
     }
+    
+    // ----------------- END - LAYOUT CONFIG FUNCTIONS -----------------  //
+    
+    // ----------------- EXTERNAL STATE FROM PARENT HANDLERS -----------------  //
+    
+    public void setGraphAndListener(Graph<String> graph, GraphUpdateListener listener) {
+        this.graph = graph;
+        this.updateListener = listener;
+        updateComboBoxes();
+    }
+    
+    private void updateComboBoxes() {
+        fromUserComboBox.removeAllItems();
+        toUserComboBox.removeAllItems();
+        
+        // Add placeholder item
+        fromUserComboBox.addItem("-- Seleccionar usuario --");
+        toUserComboBox.addItem("-- Seleccionar usuario --");
+        
+        // add options from graph nodes
+        LinkedList<String> nodes = graph.getNodes();
+        Node<String> current = nodes.getHead();
+        while (current != null) {
+            String user = current.getData();
+            fromUserComboBox.addItem(user);
+            toUserComboBox.addItem(user);
+            current = current.getNext();
+        }
+    }
+    
+    // -------------- END - EXTERNAL STATE FROM PARENT HANDLERS --------------  //
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -320,11 +358,87 @@ public class ControlsPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_userTextActionPerformed
 
     private void addUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addUserButtonActionPerformed
-        // TODO add your handling code here:
+        String username = userText.getText().trim();
+    
+        // Validate empty input
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Por favor ingresa un nombre de usuario", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        // Validate format (must start with @)
+        if (!username.startsWith("@")) {
+            JOptionPane.showMessageDialog(parentFrame, 
+                "El usuario debe comenzar con @", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        try {
+            graph.addNode(username);
+            
+            // Clear the text field
+            userText.setText("");
+            
+            // Notify parent that graph was updated
+            if (updateListener != null) {
+                updateListener.onGraphUpdated();
+            }
+            
+            // Show success message
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Usuario " + username + " agregado exitosamente", 
+                "Éxito", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (IllegalArgumentException e) {
+            // Handle case where node already exists
+            JOptionPane.showMessageDialog(parentFrame, 
+                "El usuario " + username + " ya existe en el grafo", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_addUserButtonActionPerformed
 
     private void removeUserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeUserButtonActionPerformed
-        // TODO add your handling code here:
+        String username = userText.getText().trim();
+        // Validate empty input
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Por favor ingresa un nombre de usuario", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        try {
+            graph.removeNode(username);
+            
+            // Clear the text field
+            userText.setText("");
+            
+            // Notify parent that graph was updated
+            if (updateListener != null) {
+                updateListener.onGraphUpdated();
+            }
+            
+            // Show success message
+            JOptionPane.showMessageDialog(parentFrame, 
+                "Usuario " + username + " eliminado exitosamente", 
+                "Éxito", 
+                JOptionPane.INFORMATION_MESSAGE);
+                
+        } catch (IllegalArgumentException e) {
+            // Handle case where node does not exist
+            JOptionPane.showMessageDialog(parentFrame, 
+                "El usuario " + username + " no existe en el grafo", 
+                "Error", 
+                JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_removeUserButtonActionPerformed
 
     private void addRelationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addRelationButtonActionPerformed
