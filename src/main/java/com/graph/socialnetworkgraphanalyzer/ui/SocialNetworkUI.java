@@ -24,6 +24,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
     private boolean hasUnsavedChanges;
     private InfoPanel infoPanel;
     private ControlsPanel controlsPanel;
+    private VisualizationPanel visualizationPanel;
 
     /**
      * Creates new form SocialNetworkUI
@@ -38,6 +39,10 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         
         // Configure main panel layout
         mainPanel.setLayout(new java.awt.BorderLayout());
+        
+        // Create and add visualization panel
+        visualizationPanel = new VisualizationPanel();
+        mainPanel.add(visualizationPanel, java.awt.BorderLayout.CENTER);
         
         // Create and add info panel
         infoPanel = new InfoPanel();
@@ -56,12 +61,44 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         this.setLocationRelativeTo(null);
     }
     
+    // ========== GraphUpdateListener Implementation ========== //
+    
     @Override
     public void onGraphUpdated() {
         hasUnsavedChanges = true;
         
         // update panels
         updatePanelsInfo();
+    }
+    
+    @Override
+    public void onNodeAdded(String username) {
+        hasUnsavedChanges = true;
+        infoPanel.updateGraphInfo(currentGraph);
+        controlsPanel.setGraphAndListener(currentGraph, this);
+        visualizationPanel.addNode(username);
+    }
+    
+    @Override
+    public void onNodeRemoved(String username) {
+        hasUnsavedChanges = true;
+        infoPanel.updateGraphInfo(currentGraph);
+        controlsPanel.setGraphAndListener(currentGraph, this);
+        visualizationPanel.removeNode(username);
+    }
+    
+    @Override
+    public void onEdgeAdded(String from, String to) {
+        hasUnsavedChanges = true;
+        infoPanel.updateGraphInfo(currentGraph);
+        visualizationPanel.addEdge(from, to);
+    }
+    
+    @Override
+    public void onEdgeRemoved(String from, String to) {
+        hasUnsavedChanges = true;
+        infoPanel.updateGraphInfo(currentGraph);
+        visualizationPanel.removeEdge(from, to);
     }
     
     @Override
@@ -73,10 +110,13 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
     public void onSaveFileRequested() {
         saveFile();
     }
+    
+    // ======== END - GraphUpdateListener Implementation ======== //
     public void updatePanelsInfo() {
         infoPanel.updateGraphInfo(currentGraph);
         controlsPanel.setGraphAndListener(currentGraph, this);
         controlsPanel.updateFilePath(currentFilePath);
+        visualizationPanel.rebuildGraph(currentGraph);
     }
     
     private void loadFile() {

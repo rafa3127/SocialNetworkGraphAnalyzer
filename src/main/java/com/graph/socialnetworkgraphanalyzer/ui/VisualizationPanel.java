@@ -4,17 +4,66 @@
  */
 package com.graph.socialnetworkgraphanalyzer.ui;
 
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.ui.swing_viewer.SwingViewer;
+import org.graphstream.ui.view.View;
+import org.graphstream.ui.view.Viewer;
+
+import javax.swing.*;
+import java.awt.*;
+
+
 /**
  *
  * @author rafaelc3127
  */
 public class VisualizationPanel extends javax.swing.JPanel {
+    
+    private Graph graphStreamGraph;
+    private Viewer viewer;
 
     /**
      * Creates new form VisualizationPanel
      */
     public VisualizationPanel() {
         initComponents();
+        setUpGraph();
+    }
+    
+    private void setUpGraph() {
+        setLayout(new BorderLayout());
+        
+        // Create empty GraphStream graph
+        graphStreamGraph = new SingleGraph("Red social");
+        
+        // Configure viewer
+        viewer = new SwingViewer(graphStreamGraph, Viewer.ThreadingModel.GRAPH_IN_ANOTHER_THREAD);
+        viewer.enableAutoLayout();
+        
+        // Get view component and add to panel
+        View view = viewer.addDefaultView(false);
+        add((Component) view, BorderLayout.CENTER);
+    }
+    
+    public void rebuildGraph(com.graph.socialnetworkgraphanalyzer.basicdatastructures.Graph<String> customGraph) {
+        GraphVisualizer.buildCompleteGraph(graphStreamGraph, customGraph);
+    }
+    
+    public void addNode(String username) {
+        GraphVisualizer.addNode(graphStreamGraph, username);
+    }
+    
+    public void removeNode(String username) {
+        GraphVisualizer.removeNode(graphStreamGraph, username);
+    }
+    
+    public void addEdge(String from, String to) {
+        GraphVisualizer.addEdge(graphStreamGraph, from, to);
+    }
+    
+    public void removeEdge(String from, String to) {
+        GraphVisualizer.removeEdge(graphStreamGraph, from, to);
     }
 
     /**

@@ -552,3 +552,46 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
 
 **Alternativas consideradas y descartadas:**
 - Usar GraphStream como estructura principal: viola restricción académica
+
+**Operaciones incrementales vs rebuild completo:**
+- **Decisión:** Implementar ambos enfoques - rebuild completo (`buildCompleteGraph`) y operaciones incrementales (`addNode`, `removeNode`, `addEdge`, `removeEdge`) *CONTRADICE UNA DECISION ANTERIOR DADO QUE SE ENCONTRÓ UNA MANERADE OPTIMIZAR LAS ACTUALIZACIONES*
+- **Razones:**
+  - Rebuild completo necesario para carga inicial de archivos (O(n+m) inevitable)
+  - Operaciones incrementales optimizan modificaciones individuales (O(1) vs O(n+m))
+  - Mejor experiencia de usuario: animaciones suaves al agregar/eliminar elementos
+  - Mantiene posiciones de nodos existentes (no se reposicionan todos al agregar uno)
+- **Implementación:**
+  - `buildCompleteGraph()`: limpia y reconstruye el grafo completo desde cero
+  - Operaciones incrementales: solo modifican el elemento específico en GraphStream
+  - Cada operación del grafo dispara su operación equivalente en el grafo de visualización
+- **Flujo de actualización:**
+  - Carga de archivo: `rebuildGraph()` (build completo)
+  - Agregar usuario: `onNodeAdded()` -> `addNode()` (incremental)
+  - Eliminar usuario: `onNodeRemoved()` -> `removeNode()` (incremental)
+  - Agregar relación: `onEdgeAdded()` -> `addEdge()` (incremental)
+  - Eliminar relación: `onEdgeRemoved()` -> `removeEdge()` (incremental)
+
+**Sistema de listeners específicos:**
+- **Decisión:** Extender `GraphUpdateListener` con métodos específicos para cada operación
+- **Interface expandida:**
+  - `onGraphUpdated()` - notificación genérica (mantiene compatibilidad)
+  - `onNodeAdded(String username)` - notificación específica de nuevo nodo
+  - `onNodeRemoved(String username)` - notificación específica de nodo eliminado
+  - `onEdgeAdded(String from, String to)` - notificación específica de nueva arista
+  - `onEdgeRemoved(String from, String to)` - notificación específica de arista eliminada
+- **Razones:**
+  - Permite operaciones incrementales en visualización
+  - Mantiene separación de responsabilidades (ControlsPanel notifica qué cambió, SocialNetworkUI decide qué hacer)
+  - Escalable para futuras optimizaciones
+- **Implementación en ControlsPanel:**
+  - Cada event handler llama al listener específico en lugar del genérico
+  - Ejemplo: botón "Agregar Usuario" llama `listener.onNodeAdded(username)`
+
+**Generación de IDs únicos para aristas:**
+- **Decisión:** Usar formato `"from->to"` como ID de arista en GraphStream
+- **Razones:**
+  - GraphStream requiere ID único para cada arista
+  - Formato descriptivo y fácil de debuggear
+  - Garantiza unicidad (dos usuarios no pueden tener arista duplicada en grafo dirigido)
+- **Implementación:** `String edgeId = from + "->" + to;`
+- **Contraste con `buildCompleteGraph`:** Usa IDs numerados secuenciales (`"e0"`, `"e1"`, etc.) porque no necesita rastrear aristas específicas

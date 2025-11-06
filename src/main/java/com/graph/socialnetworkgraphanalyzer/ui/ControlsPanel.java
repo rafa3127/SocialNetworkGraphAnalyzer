@@ -483,7 +483,7 @@ public class ControlsPanel extends javax.swing.JPanel {
             
             // Notify parent that graph was updated
             if (updateListener != null) {
-                updateListener.onGraphUpdated();
+                updateListener.onNodeAdded(username);
             }
             
             // Show success message
@@ -520,7 +520,7 @@ public class ControlsPanel extends javax.swing.JPanel {
             
             // Notify parent that graph was updated
             if (updateListener != null) {
-                updateListener.onGraphUpdated();
+                updateListener.onNodeRemoved(username);
             }
             
             // Show success message
@@ -565,7 +565,7 @@ public class ControlsPanel extends javax.swing.JPanel {
             
             // Notify parent that graph was updated
             if (updateListener != null) {
-                updateListener.onGraphUpdated();
+                updateListener.onEdgeAdded(fromUser, toUser);
             }
             
             // Show success message
@@ -602,7 +602,7 @@ public class ControlsPanel extends javax.swing.JPanel {
             
             // Notify parent that graph was updated
             if (updateListener != null) {
-                updateListener.onGraphUpdated();
+                updateListener.onEdgeRemoved(fromUser,toUser);
             }
             
             // Show success message

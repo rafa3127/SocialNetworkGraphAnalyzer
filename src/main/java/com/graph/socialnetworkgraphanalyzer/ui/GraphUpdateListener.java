@@ -10,6 +10,10 @@ package com.graph.socialnetworkgraphanalyzer.ui;
  */
 public interface GraphUpdateListener {
     void onGraphUpdated();
+    void onNodeAdded(String username);
+    void onNodeRemoved(String username);
+    void onEdgeAdded(String from, String to);
+    void onEdgeRemoved(String from, String to);
     void onLoadFileRequested();
     void onSaveFileRequested();
 }
