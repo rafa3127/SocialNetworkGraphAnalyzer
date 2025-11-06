@@ -101,13 +101,17 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ---
 
-### ☐ Fase 5: Visualización del Grafo
-**Objetivo:** Integrar representación visual
+### Fase 5: Visualización del Grafo
+**Objetivo:** Integrar representación visual usando GraphStream
 
 **Tareas:**
-- (a desarrollar)
+- [ ] Agregar dependencias de GraphStream al `pom.xml` (`gs-core` y `gs-ui-swing`)
+- [ ] Crear clase `GraphVisualizer.java` en paquete `ui` (lógica de conversión y estilo)
+- [ ] Implementar clase `VisualizationPanel.java` en paquete `ui` (contenedor UI con GraphStream viewer)
+- [ ] Integrar componente de gráfico
+- [ ] Testing manual con datos de ejemplo
 
-**Entregable:** Visualización completa con componentes
+**Entregable:** Visualización completa del grafo con componentes coloreados
 
 ---
 
@@ -526,3 +530,25 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Se ejecuta automáticamente en todos los flujos (cargar, guardar, nuevo, modificar)
   - Mantiene sincronización sin código duplicado
 - **Formato:** "Archivo: ruta/completa" o "Archivo: No asignado" si `currentFilePath == null`
+
+### Decisiones sobre visualización con GraphStream (Fase 5)
+
+**Arquitectura en 2 capas:**
+- **Decisión:** Separar en `GraphVisualizer` (lógica) + `VisualizationPanel` (UI)
+- **Razones:**
+  - GraphVisualizer es clase utilitaria con métodos estáticos, sin estado, reutilizable y testeable
+  - VisualizationPanel es contenedor UI simple que delega toda la lógica
+  - Separación de responsabilidades clara (conversión vs presentación)
+- **API limpia:** VisualizationPanel expone solo metodos para actualizar el grafico y sus caracteristicas desde el componente padre
+
+**Conversión Graph<String> -> GraphStream Graph:**
+- **Decisión:** Convertir la estructura custom a la estructura interna de GraphStream
+- **Razones:**
+  - GraphStream es un framework completo, no solo librería de dibujo
+  - Necesita su propio modelo para manejar metadatos (posiciones, estilos, eventos)
+  - No puede "dibujar directamente" estructuras custom que no conoce
+- **Costo:** O(n+m) una sola vez cuando cambia el grafo (operacion costosa pero necesaria)
+- **Fuente de verdad:** `Graph<String>` sigue siendo el modelo principal, GraphStream solo para renderizado
+
+**Alternativas consideradas y descartadas:**
+- Usar GraphStream como estructura principal: viola restricción académica
