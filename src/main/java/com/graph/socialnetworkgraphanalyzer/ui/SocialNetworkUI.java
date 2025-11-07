@@ -77,6 +77,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         infoPanel.updateGraphInfo(currentGraph);
         controlsPanel.setGraphAndListener(currentGraph, this);
         visualizationPanel.addNode(username);
+        visualizationPanel.resetComponentColors();
     }
     
     @Override
@@ -85,6 +86,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         infoPanel.updateGraphInfo(currentGraph);
         controlsPanel.setGraphAndListener(currentGraph, this);
         visualizationPanel.removeNode(username);
+        visualizationPanel.resetComponentColors();
     }
     
     @Override
@@ -92,6 +94,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         hasUnsavedChanges = true;
         infoPanel.updateGraphInfo(currentGraph);
         visualizationPanel.addEdge(from, to);
+        visualizationPanel.resetComponentColors();
     }
     
     @Override
@@ -99,6 +102,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         hasUnsavedChanges = true;
         infoPanel.updateGraphInfo(currentGraph);
         visualizationPanel.removeEdge(from, to);
+        visualizationPanel.resetComponentColors();
     }
     
     @Override
@@ -264,6 +268,9 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         
         // Update InfoPanel with components
         infoPanel.updateComponents(components);
+        
+        // Update visualization with colors
+        visualizationPanel.updateComponentColors(components);
         
         // Show success message
         JOptionPane.showMessageDialog(this,

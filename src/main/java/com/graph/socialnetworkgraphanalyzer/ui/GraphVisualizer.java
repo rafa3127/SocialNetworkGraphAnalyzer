@@ -138,6 +138,80 @@ public class GraphVisualizer {
     }
     
     /**
+     * Applies color coding to nodes based on strongly connected components.
+     * 
+     * @param gsGraph The GraphStream graph to style
+     * @param components List of components from Kosaraju algorithm (null to reset)
+     */
+    public static void applyComponentColors(org.graphstream.graph.Graph gsGraph, LinkedList<LinkedList<String>> components) {
+        
+        if (components == null || components.isEmpty()) {
+            // Reset to default styling 
+            gsGraph.nodes().forEach(node -> {
+                node.removeAttribute("ui.class");
+            });
+            
+            gsGraph.edges().forEach(edge -> {
+                edge.removeAttribute("ui.class");
+            });
+            
+            gsGraph.setAttribute("ui.stylesheet", getBaseStylesheet());
+            return;
+        }
+        
+        // Assign CSS class to each node based on component
+        int componentIndex = 0;
+        Node<LinkedList<String>> compNode = components.getHead();
+        
+        while (compNode != null) {
+            LinkedList<String> component = compNode.getData();
+            String className = "component" + componentIndex;
+            
+            Node<String> userNode = component.getHead();
+            while (userNode != null) {
+                String username = userNode.getData();
+                org.graphstream.graph.Node gsNode = gsGraph.getNode(username);
+                
+                if (gsNode != null) {
+                    gsNode.setAttribute("ui.class", className);
+                }
+                
+                userNode = userNode.getNext();
+            }
+            
+            componentIndex++;
+            compNode = compNode.getNext();
+        }
+        
+        // Color edges based on source node's component
+        colorEdgesBySourceComponent(gsGraph);
+        
+        // Apply stylesheet with component colors
+        gsGraph.setAttribute("ui.stylesheet", getStyledStylesheet(componentIndex));
+    }
+    
+    /**
+     * Colors edges only if both source and target belong to the same component.
+     * Edges between different components remain gray.
+     */
+    private static void colorEdgesBySourceComponent(org.graphstream.graph.Graph gsGraph) {
+        gsGraph.edges().forEach(edge -> {
+            org.graphstream.graph.Node sourceNode = edge.getSourceNode();
+            org.graphstream.graph.Node targetNode = edge.getTargetNode();
+            
+            if (sourceNode != null && targetNode != null) {
+                Object sourceClass = sourceNode.getAttribute("ui.class");
+                Object targetClass = targetNode.getAttribute("ui.class");
+                
+                // Only color edge if both nodes are in the same component
+                if (sourceClass != null && sourceClass.equals(targetClass)) {
+                    edge.setAttribute("ui.class", sourceClass.toString());
+                }
+            }
+        });
+    }
+    
+    /**
      * Returns the base stylesheet for the graph visualization.
      */
     private static String getBaseStylesheet() {
@@ -156,5 +230,47 @@ public class GraphVisualizer {
            "    arrow-size: 12px, 6px; " +
            "    arrow-shape: arrow; " +
            "}";
+    }
+    
+    /**
+     * Returns stylesheet with component-specific colors.
+     */
+    private static String getStyledStylesheet(int componentCount) {
+        StringBuilder css = new StringBuilder();
+        
+        // Base styles for nodes (without fill-color, will be set by class)
+        css.append("node { ");
+        css.append("    size: 25px; ");
+        css.append("    text-size: 14px; ");
+        css.append("    text-color: #2c3e50; ");
+        css.append("    text-offset: 0px, 25px; ");
+        css.append("    text-alignment: center; ");
+        css.append("    text-background-mode: none; ");
+        css.append("    stroke-mode: none; ");
+        css.append("} ");
+        
+        // Base styles for edges - GRAY by default
+        css.append("edge { ");
+        css.append("    fill-color: #95a5a6; ");  // ← Gray por defecto
+        css.append("    arrow-size: 12px, 6px; ");
+        css.append("    arrow-shape: arrow; ");
+        css.append("} ");
+        
+        // Component-specific colors for nodes AND edges
+        for (int i = 0; i < componentCount; i++) {
+            String color = COMPONENT_COLORS[i % COMPONENT_COLORS.length];
+            
+            // Node colors
+            css.append("node.component").append(i).append(" { ");
+            css.append("    fill-color: ").append(color).append("; ");
+            css.append("} ");
+            
+            // Edge colors (only applied if both endpoints in same component)
+            css.append("edge.component").append(i).append(" { ");
+            css.append("    fill-color: ").append(color).append("; ");
+            css.append("} ");
+        }
+        
+        return css.toString();
     }
 }

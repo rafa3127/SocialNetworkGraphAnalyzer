@@ -10,6 +10,8 @@ import org.graphstream.ui.swing_viewer.SwingViewer;
 import org.graphstream.ui.view.View;
 import org.graphstream.ui.view.Viewer;
 
+import com.graph.socialnetworkgraphanalyzer.basicdatastructures.LinkedList;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -64,6 +66,14 @@ public class VisualizationPanel extends javax.swing.JPanel {
     
     public void removeEdge(String from, String to) {
         GraphVisualizer.removeEdge(graphStreamGraph, from, to);
+    }
+    
+    public void updateComponentColors(LinkedList<LinkedList<String>> components) {
+        GraphVisualizer.applyComponentColors(graphStreamGraph, components);
+    }
+    
+    public void resetComponentColors() {
+        GraphVisualizer.applyComponentColors(graphStreamGraph, null);
     }
 
     /**
