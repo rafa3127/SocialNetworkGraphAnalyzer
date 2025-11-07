@@ -11,6 +11,8 @@ Rafael Correa
 
 ## Requisitos
 - Java 11 o superior
+  - Por defecto el proyecto usa Java 24
+  - Para usar Java 11: cambiar `<maven.compiler.release>24</maven.compiler.release>` a `11` en `pom.xml`
 - Maven 3.6+
 - GraphStream 2.0 (incluido en dependencias)
 
