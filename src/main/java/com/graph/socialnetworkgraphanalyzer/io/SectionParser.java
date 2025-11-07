@@ -11,6 +11,12 @@ import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
  *
  * @author rafaelc3127
  */
+
+/**
+ * Generic parser for text files organized in sections.
+ * Sections are identified by headers that match a configured whitelist.
+ * 
+ */
 public class SectionParser {
     
     private HashMap<String, Boolean> sectionNames;

@@ -14,6 +14,13 @@ import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
  *
  * @author rafaelc3127
  */
+
+/**
+ * Implementation of Kosaraju's algorithm for finding strongly connected components (SCC) in a directed graph.
+ * 
+ * A strongly connected component is a maximal set of nodes where every node is reachable 
+ * from every other node in the set through directed edges.
+ */
 public class Kosaraju {
     /**
      * Apply depth-first search starting from a given node.
@@ -81,7 +88,13 @@ public class Kosaraju {
         
         return transposed;
     }
-    
+    /**
+     * Finds all strongly connected components (SCCs) in the given directed graph.
+     * 
+     * @param <T> The type of nodes in the graph
+     * @param graph The directed graph to analyze
+     * @return A LinkedList where each element is a LinkedList representing one strongly connected component
+     */
     public static <T> LinkedList<LinkedList<T>> findSCC(Graph<T> graph) {
         // Step 1: First DFS in prder to get finish order
         HashMap<T, Boolean> visited = new HashMap<>();

@@ -15,6 +15,11 @@ import com.graph.socialnetworkgraphanalyzer.basicdatastructures.Node;
  *
  * @author rafaelc3127
  */
+
+/**
+ * Manages loading and saving of Graph objects from/to text files.
+ * 
+ */
 public class GraphFileManager {
     
     /**
