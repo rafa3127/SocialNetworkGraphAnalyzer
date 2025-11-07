@@ -101,13 +101,17 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 
 ---
 
-### ☐ Fase 5: Visualización del Grafo
-**Objetivo:** Integrar representación visual
+### Fase 5: Visualización del Grafo
+**Objetivo:** Integrar representación visual usando GraphStream
 
 **Tareas:**
-- (a desarrollar)
+- [ ] Agregar dependencias de GraphStream al `pom.xml` (`gs-core` y `gs-ui-swing`)
+- [ ] Crear clase `GraphVisualizer.java` en paquete `ui` (lógica de conversión y estilo)
+- [ ] Implementar clase `VisualizationPanel.java` en paquete `ui` (contenedor UI con GraphStream viewer)
+- [ ] Integrar componente de gráfico
+- [ ] Testing manual con datos de ejemplo
 
-**Entregable:** Visualización completa con componentes
+**Entregable:** Visualización completa del grafo con componentes coloreados
 
 ---
 
@@ -526,3 +530,68 @@ La arquitectura actual permite estas extensiones sin necesidad de refactorizaci�
   - Se ejecuta automáticamente en todos los flujos (cargar, guardar, nuevo, modificar)
   - Mantiene sincronización sin código duplicado
 - **Formato:** "Archivo: ruta/completa" o "Archivo: No asignado" si `currentFilePath == null`
+
+### Decisiones sobre visualización con GraphStream (Fase 5)
+
+**Arquitectura en 2 capas:**
+- **Decisión:** Separar en `GraphVisualizer` (lógica) + `VisualizationPanel` (UI)
+- **Razones:**
+  - GraphVisualizer es clase utilitaria con métodos estáticos, sin estado, reutilizable y testeable
+  - VisualizationPanel es contenedor UI simple que delega toda la lógica
+  - Separación de responsabilidades clara (conversión vs presentación)
+- **API limpia:** VisualizationPanel expone solo metodos para actualizar el grafico y sus caracteristicas desde el componente padre
+
+**Conversión Graph<String> -> GraphStream Graph:**
+- **Decisión:** Convertir la estructura custom a la estructura interna de GraphStream
+- **Razones:**
+  - GraphStream es un framework completo, no solo librería de dibujo
+  - Necesita su propio modelo para manejar metadatos (posiciones, estilos, eventos)
+  - No puede "dibujar directamente" estructuras custom que no conoce
+- **Costo:** O(n+m) una sola vez cuando cambia el grafo (operacion costosa pero necesaria)
+- **Fuente de verdad:** `Graph<String>` sigue siendo el modelo principal, GraphStream solo para renderizado
+
+**Alternativas consideradas y descartadas:**
+- Usar GraphStream como estructura principal: viola restricción académica
+
+**Operaciones incrementales vs rebuild completo:**
+- **Decisión:** Implementar ambos enfoques - rebuild completo (`buildCompleteGraph`) y operaciones incrementales (`addNode`, `removeNode`, `addEdge`, `removeEdge`) *CONTRADICE UNA DECISION ANTERIOR DADO QUE SE ENCONTRÓ UNA MANERADE OPTIMIZAR LAS ACTUALIZACIONES*
+- **Razones:**
+  - Rebuild completo necesario para carga inicial de archivos (O(n+m) inevitable)
+  - Operaciones incrementales optimizan modificaciones individuales (O(1) vs O(n+m))
+  - Mejor experiencia de usuario: animaciones suaves al agregar/eliminar elementos
+  - Mantiene posiciones de nodos existentes (no se reposicionan todos al agregar uno)
+- **Implementación:**
+  - `buildCompleteGraph()`: limpia y reconstruye el grafo completo desde cero
+  - Operaciones incrementales: solo modifican el elemento específico en GraphStream
+  - Cada operación del grafo dispara su operación equivalente en el grafo de visualización
+- **Flujo de actualización:**
+  - Carga de archivo: `rebuildGraph()` (build completo)
+  - Agregar usuario: `onNodeAdded()` -> `addNode()` (incremental)
+  - Eliminar usuario: `onNodeRemoved()` -> `removeNode()` (incremental)
+  - Agregar relación: `onEdgeAdded()` -> `addEdge()` (incremental)
+  - Eliminar relación: `onEdgeRemoved()` -> `removeEdge()` (incremental)
+
+**Sistema de listeners específicos:**
+- **Decisión:** Extender `GraphUpdateListener` con métodos específicos para cada operación
+- **Interface expandida:**
+  - `onGraphUpdated()` - notificación genérica (mantiene compatibilidad)
+  - `onNodeAdded(String username)` - notificación específica de nuevo nodo
+  - `onNodeRemoved(String username)` - notificación específica de nodo eliminado
+  - `onEdgeAdded(String from, String to)` - notificación específica de nueva arista
+  - `onEdgeRemoved(String from, String to)` - notificación específica de arista eliminada
+- **Razones:**
+  - Permite operaciones incrementales en visualización
+  - Mantiene separación de responsabilidades (ControlsPanel notifica qué cambió, SocialNetworkUI decide qué hacer)
+  - Escalable para futuras optimizaciones
+- **Implementación en ControlsPanel:**
+  - Cada event handler llama al listener específico en lugar del genérico
+  - Ejemplo: botón "Agregar Usuario" llama `listener.onNodeAdded(username)`
+
+**Generación de IDs únicos para aristas:**
+- **Decisión:** Usar formato `"from->to"` como ID de arista en GraphStream
+- **Razones:**
+  - GraphStream requiere ID único para cada arista
+  - Formato descriptivo y fácil de debuggear
+  - Garantiza unicidad (dos usuarios no pueden tener arista duplicada en grafo dirigido)
+- **Implementación:** `String edgeId = from + "->" + to;`
+- **Contraste con `buildCompleteGraph`:** Usa IDs numerados secuenciales (`"e0"`, `"e1"`, etc.) porque no necesita rastrear aristas específicas
