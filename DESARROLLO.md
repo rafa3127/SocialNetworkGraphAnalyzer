@@ -105,11 +105,11 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Integrar representación visual usando GraphStream
 
 **Tareas:**
-- [ ] Agregar dependencias de GraphStream al `pom.xml` (`gs-core` y `gs-ui-swing`)
-- [ ] Crear clase `GraphVisualizer.java` en paquete `ui` (lógica de conversión y estilo)
-- [ ] Implementar clase `VisualizationPanel.java` en paquete `ui` (contenedor UI con GraphStream viewer)
-- [ ] Integrar componente de gráfico
-- [ ] Testing manual con datos de ejemplo
+- [x] Agregar dependencias de GraphStream al `pom.xml` (`gs-core` y `gs-ui-swing`)
+- [x] Crear clase `GraphVisualizer.java` en paquete `ui` (lógica de conversión y estilo)
+- [x] Implementar clase `VisualizationPanel.java` en paquete `ui` (contenedor UI con GraphStream viewer)
+- [x] Integrar componente de gráfico
+- [x] Testing manual con datos de ejemplo
 
 **Entregable:** Visualización completa del grafo con componentes coloreados
 
