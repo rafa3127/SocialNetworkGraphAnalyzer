@@ -124,7 +124,7 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 - [x] Funcionalidad para precargar data de prueba
 - [x] Diagrama de clases
 - [x] Revision de cumplimiento de requerimientos
-- [ ] Entrega 🥳
+- [x] Entrega 🥳
 
 **Entregable:** Proyecto completo, documentado y listo para entrega
 
