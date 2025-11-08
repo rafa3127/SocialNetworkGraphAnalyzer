@@ -51,6 +51,32 @@ relaciones
 - **Framework UI**: Java Swing con arquitectura basada en componentes
 - **Visualización**: Librería GraphStream para renderizado del grafo
 
+---
+
+## Diagrama de Clases
+
+El proyecto incluye un diagrama UML completo que muestra la arquitectura del sistema `/diagrama_de_clases_sna.png`.
+
+### Visualizar el Diagrama
+
+**Opción 1: Usando PlantUML Online (Recomendado)**
+1. Ve a [PlantUML Online Editor](https://www.plantuml.com/plantuml/uml/)
+2. Abre el archivo `/class-diagram.txt` de este repositorio
+3. Copia todo el contenido
+4. Pégalo en el editor online
+5. El diagrama se generará automáticamente
+
+### Estructura del Diagrama
+
+El diagrama está organizado en 4 paquetes principales:
+
+- **basicdatastructures**: Estructuras de datos propias (LinkedList, HashMap, Graph, Node, Entry, Edge)
+- **algorithm**: Implementación del algoritmo de Kosaraju
+- **io**: Sistema de lectura/escritura de archivos en 3 capas (FileIO, SectionParser, GraphFileManager)
+- **ui**: Componentes de interfaz gráfica (SocialNetworkUI, InfoPanel, ControlsPanel, VisualizationPanel, GraphVisualizer)
+
+El diagrama muestra todas las clases con sus atributos, métodos y relaciones (composición, uso, herencia/implementación).
+
 ## Cómo Ejecutar
 1. Clonar el repositorio
 2. Abrir el proyecto en NetBeans o tu IDE preferido

@@ -121,7 +121,9 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Tareas:**
 - [x] Revisar completitud de javadocs
 - [x] Documentacion de usuario
-- [ ] Revision de cumplimiento de requerimientos
+- [x] Funcionalidad para precargar data de prueba
+- [x] Diagrama de clases
+- [x] Revision de cumplimiento de requerimientos
 - [ ] Entrega 🥳
 
 **Entregable:** Proyecto completo, documentado y listo para entrega
