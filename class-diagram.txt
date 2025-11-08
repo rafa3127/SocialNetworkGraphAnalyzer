@@ -1,0 +1,235 @@
+@startuml SocialNetworkGraphAnalyzer
+
+!define PRIVATE -
+!define PUBLIC +
+!define PROTECTED #
+!define PACKAGE ~
+
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+' ==================== BASIC DATA STRUCTURES ====================
+package "basicdatastructures" {
+    
+    class "Node<T>" {
+        ~ T data
+        ~ Node<T> next
+        + Node(T data)
+        + getData(): T
+        + getNext(): Node<T>
+    }
+    
+    class "Entry<K,V>" {
+        + K key
+        + V value
+        + Entry<K,V> next
+        + Entry(K key, V value)
+    }
+    
+    class "Edge<T>" {
+        + T from
+        + T to
+        + Edge(T from, T to)
+        + toString(): String
+    }
+    
+    class "LinkedList<T>" {
+        - Node<T> head
+        - Node<T> tail
+        - int size
+        + LinkedList()
+        + isEmpty(): boolean
+        + add(T data): void
+        + remove(T data): void
+        + contains(T data): boolean
+        + getSize(): int
+        + clear(): void
+        + getHead(): Node<T>
+        + toString(): String
+    }
+    
+    class "HashMap<K,V>" {
+        - int currentCapacity
+        - Entry<K,V>[] buckets
+        - int elementCount
+        + HashMap()
+        - hash(K key): int
+        - hash(K key, int capacity): int
+        - requestMemory(): void
+        + put(K key, V value): void
+        + get(K key): V
+        + remove(K key): void
+        + containsKey(K key): boolean
+        + size(): int
+        + isEmpty(): boolean
+        + getKeys(): LinkedList<K>
+    }
+    
+    class "Graph<T>" {
+        - HashMap<T, LinkedList<T>> adjacencyList
+        - int edgeCount
+        + Graph()
+        + addNode(T node): void
+        + removeNode(T node): void
+        + containsNode(T node): boolean
+        + getNodes(): LinkedList<T>
+        + getNodeCount(): int
+        + addEdge(T from, T to): void
+        + removeEdge(T from, T to): void
+        + getEdges(): LinkedList<Edge<T>>
+        + getOutgoingNodes(T node): LinkedList<T>
+        + getEdgeCount(): int
+        + isEmpty(): boolean
+    }
+    
+    ' Relationships in basicdatastructures
+    LinkedList "1" *-- "0..*" Node : contains
+    HashMap "1" *-- "0..*" Entry : contains
+    Graph "1" *-- "1" HashMap : uses
+    Graph ..> LinkedList : uses
+    Graph ..> Edge : creates
+}
+
+' ==================== ALGORITHM ====================
+package "algorithm" {
+    
+    class Kosaraju <<utility>> {
+        - {static} dfs<T>(T node, Graph<T> graph, HashMap<T,Boolean> visited, LinkedList<T> result): void
+        - {static} transpose<T>(Graph<T> graph): Graph<T>
+        + {static} findSCC<T>(Graph<T> graph): LinkedList<LinkedList<T>>
+    }
+    
+    ' Relationships
+    Kosaraju ..> Graph : analyzes
+    Kosaraju ..> HashMap : uses
+    Kosaraju ..> LinkedList : uses
+}
+
+' ==================== IO ====================
+package "io" {
+    
+    class FileIO <<utility>> {
+        + {static} readFile(String filepath): LinkedList<String>
+        + {static} writeFile(String filepath, LinkedList<?> lines): void
+    }
+    
+    class SectionParser {
+        - HashMap<String, Boolean> sectionNames
+        + SectionParser(String[] sectionNames)
+        - isSectionHeader(String line): boolean
+        + parse(LinkedList<String> lines): HashMap<String, LinkedList<String>>
+        + serialize(HashMap<String, LinkedList<String>> sections): LinkedList<String>
+    }
+    
+    class GraphFileManager <<utility>> {
+        + {static} loadGraphFromFile(String filepath): Graph<String>
+        + {static} saveGraphToFile(Graph<String> graph, String filepath): void
+    }
+    
+    ' Relationships
+    SectionParser ..> HashMap : uses
+    SectionParser ..> LinkedList : uses
+    GraphFileManager ..> FileIO : uses
+    GraphFileManager ..> SectionParser : uses
+    GraphFileManager ..> Graph : creates/saves
+    FileIO ..> LinkedList : uses
+}
+
+' ==================== UI ====================
+package "ui" {
+    
+    interface GraphUpdateListener {
+        + onGraphUpdated(): void
+        + onNodeAdded(String username): void
+        + onNodeRemoved(String username): void
+        + onEdgeAdded(String from, String to): void
+        + onEdgeRemoved(String from, String to): void
+        + onLoadFileRequested(): void
+        + onSaveFileRequested(): void
+    }
+    
+    class GraphVisualizer <<utility>> {
+        - {static} COMPONENT_COLORS: String[]
+        + {static} buildCompleteGraph(org.graphstream.graph.Graph gsGraph, Graph<String> customGraph): void
+        + {static} addNode(org.graphstream.graph.Graph gsGraph, String username): void
+        + {static} removeNode(org.graphstream.graph.Graph gsGraph, String username): void
+        + {static} addEdge(org.graphstream.graph.Graph gsGraph, String from, String to): void
+        + {static} removeEdge(org.graphstream.graph.Graph gsGraph, String from, String to): void
+        + {static} applyComponentColors(org.graphstream.graph.Graph gsGraph, LinkedList<LinkedList<String>> components): void
+        - {static} colorEdgesBySourceComponent(org.graphstream.graph.Graph gsGraph): void
+        - {static} getBaseStylesheet(): String
+        - {static} getStyledStylesheet(int componentCount): String
+    }
+    
+    class VisualizationPanel {
+        - Graph graphStreamGraph
+        - Viewer viewer
+        + VisualizationPanel()
+        - setUpGraph(): void
+        + rebuildGraph(Graph<String> customGraph): void
+        + addNode(String username): void
+        + removeNode(String username): void
+        + addEdge(String from, String to): void
+        + removeEdge(String from, String to): void
+        + updateComponentColors(LinkedList<LinkedList<String>> components): void
+        + resetComponentColors(): void
+    }
+    
+    class InfoPanel {
+        + InfoPanel()
+        + updateGraphInfo(Graph<String> graph): void
+        + updateComponents(LinkedList<LinkedList<String>> components): void
+        + resetComponents(): void
+    }
+    
+    class ControlsPanel {
+        - Graph<String> graph
+        - GraphUpdateListener listener
+        + ControlsPanel()
+        + setGraphAndListener(Graph<String> graph, GraphUpdateListener listener): void
+        + updateFilePath(String filepath): void
+    }
+    
+    class SocialNetworkUI {
+        - Graph<String> currentGraph
+        - String currentFilePath
+        - boolean hasUnsavedChanges
+        - InfoPanel infoPanel
+        - ControlsPanel controlsPanel
+        - VisualizationPanel visualizationPanel
+        + SocialNetworkUI()
+        + onGraphUpdated(): void
+        + onNodeAdded(String username): void
+        + onNodeRemoved(String username): void
+        + onEdgeAdded(String from, String to): void
+        + onEdgeRemoved(String from, String to): void
+        + onLoadFileRequested(): void
+        + onSaveFileRequested(): void
+        + updatePanelsInfo(): void
+        - loadFile(): void
+        - saveFile(): void
+        - newGraph(): void
+        - exitApplication(): void
+        - showInitialLoadDialog(): void
+        - loadSampleData(): void
+    }
+    
+    ' Relationships in UI
+    SocialNetworkUI ..|> GraphUpdateListener : implements
+    SocialNetworkUI "1" *-- "1" InfoPanel : contains
+    SocialNetworkUI "1" *-- "1" ControlsPanel : contains
+    SocialNetworkUI "1" *-- "1" VisualizationPanel : contains
+    SocialNetworkUI "1" *-- "1" Graph : manages
+    ControlsPanel ..> GraphUpdateListener : notifies
+    VisualizationPanel ..> GraphVisualizer : uses
+    GraphVisualizer ..> Graph : converts
+    GraphVisualizer ..> LinkedList : uses
+    InfoPanel ..> Graph : displays
+    InfoPanel ..> LinkedList : displays
+}
+
+' ==================== CROSS-PACKAGE RELATIONSHIPS ====================
+SocialNetworkUI ..> GraphFileManager : uses
+SocialNetworkUI ..> Kosaraju : uses
+
+@enduml

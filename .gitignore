@@ -29,4 +29,3 @@ Thumbs.db
 !lib/*.jar
 
 # Ignorar carpeta de acrhivos para tests de manejo de archivos
-test_data/*.txt

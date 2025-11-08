@@ -1,0 +1,7 @@
+usuarios
+@alice
+@charlie
+@bob
+relaciones
+@alice, @bob
+@bob, @charlie

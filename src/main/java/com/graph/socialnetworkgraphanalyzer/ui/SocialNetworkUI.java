@@ -59,6 +59,7 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
         // Configure window
         this.setSize(1200, 700); 
         this.setLocationRelativeTo(null);
+        showInitialLoadDialog();
     }
     
     // ========== GraphUpdateListener Implementation ========== //
@@ -277,6 +278,64 @@ public class SocialNetworkUI extends javax.swing.JFrame implements GraphUpdateLi
             "Análisis completado: se encontraron " + components.getSize() + " componente(s) fuertemente conectado(s)",
             "Análisis exitoso",
             JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    private void showInitialLoadDialog() {
+        Object[] options = {"Cargar datos de prueba", "Empezar vacío", "Cargar archivo..."};
+        int choice = JOptionPane.showOptionDialog(
+            this,
+            "¿Desea cargar datos de prueba para comenzar?",
+            "Inicialización",
+            JOptionPane.YES_NO_CANCEL_OPTION,
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]
+        );
+        
+        switch (choice) {
+            case 0: // Load sample data
+                loadSampleData();
+                break;
+            case 1: // Start empty
+                // Do nothing, graph is already empty
+                break;
+            case 2: // Load file
+                loadFile();
+                break;
+            default: // User closed dialog
+                // Do nothing, graph is already empty
+                break;
+        }
+    }
+    
+    private void loadSampleData() {
+        try {
+            String sampleFilePath = "test_data/data.txt";
+            currentGraph = GraphFileManager.loadGraphFromFile(sampleFilePath);
+            currentFilePath = sampleFilePath;
+            hasUnsavedChanges = false;
+            
+            updatePanelsInfo();
+            visualizationPanel.rebuildGraph(currentGraph);
+            
+            JOptionPane.showMessageDialog(
+                this,
+                "Datos de prueba cargados exitosamente.\n" +
+                "Usuarios: " + currentGraph.getNodeCount() + "\n" +
+                "Relaciones: " + currentGraph.getEdgeCount(),
+                "Carga Exitosa",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Error al cargar datos de prueba: " + e.getMessage(),
+                "Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            logger.severe("Error loading sample data: " + e.getMessage());
+        }
     }
     /**
      * This method is called from within the constructor to initialize the form.

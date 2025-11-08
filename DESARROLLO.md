@@ -119,7 +119,12 @@ Después de analizar los requerimientos del proyecto, se determinó que el desar
 **Objetivo:** Pulir el proyecto y preparar entrega
 
 **Tareas:**
-- (a definir)
+- [x] Revisar completitud de javadocs
+- [x] Documentacion de usuario
+- [x] Funcionalidad para precargar data de prueba
+- [x] Diagrama de clases
+- [x] Revision de cumplimiento de requerimientos
+- [x] Entrega 🥳
 
 **Entregable:** Proyecto completo, documentado y listo para entrega
 
