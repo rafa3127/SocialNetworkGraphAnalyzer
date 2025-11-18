@@ -52,6 +52,23 @@ public class LinkedList<T> {
     }
     
     /**
+     * Adds an element to the beginning of the list.
+     * Useful for implementing stack behavior (LIFO).
+     * 
+     * @param data The element to add to the front of the list
+     */
+    public void addFirst(T data) {
+        Node<T> newNode = new Node<>(data);
+        if (this.isEmpty()) {
+            this.head = this.tail = newNode;
+        } else {
+            newNode.next = this.head;
+            this.head = newNode;
+        }
+        this.size++;
+    }
+    
+    /**
      * Removes the first occurrence of the specified element from the list.
      * 
      * @param data The element to remove
