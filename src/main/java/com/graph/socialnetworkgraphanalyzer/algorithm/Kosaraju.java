@@ -54,8 +54,8 @@ public class Kosaraju {
             }
             current = current.getNext();
         }
-        // result to save finished order
-        result.add(node);
+        // result to save finished order in reverse (stack behavior)
+        result.addFirst(node);
     }
     
     /**
